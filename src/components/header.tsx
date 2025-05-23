@@ -5,13 +5,15 @@ import Link from "next/link";
 
 const Header = () => {
   return (
-    <header className="container w-screen h-24 flex justify-center px-3 fixed bg-white">
+    <header className="container w-screen h-24 flex justify-center fixed bg-white px-10 md:px-0">
       <div className="w-screen flex justify-between container">
-        <div className="flex items-center gap-1">
-          <Circle />
-          <Triangle />
-          <Square />
-        </div>
+        <Link href={"/"} className="flex items-center ">
+          <div className="flex items-center gap-1">
+            <Circle />
+            <Triangle />
+            <Square />
+          </div>
+        </Link>
         <div className="flex items-center gap-3">
           <Button variant="ghost" asChild>
             <Link href={"/auth/login"} className="hover:cursor-pointer">
