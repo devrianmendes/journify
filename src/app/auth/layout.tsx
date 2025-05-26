@@ -9,7 +9,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="antialiased flex justify-center">
+    <main className="antialiased flex justify-center w-screen">
       <Header />
       {children}
     </main>

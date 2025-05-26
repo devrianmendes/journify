@@ -18,10 +18,10 @@ import Link from "next/link";
 
 export default async function Home() {
   return (
-    <div className="container">
+    <div className="w-screen">
       <main>
         <Header />
-        <section className="container text-center h-screen flex justify-center items-center">
+        <section className="h-screen flex justify-center items-center text-center">
           <div>
             <p className="text-4xl font-bold">
               Acompanhe. Conecte. Suba de nível.
@@ -82,7 +82,7 @@ export default async function Home() {
           </div>
         </section>
         <section className="h-96 flex justify-center flex-col">
-          <div className="h-56 flex flex-col gap-2 justify-center text-center items-center">
+          <div className="h-96 flex flex-col gap-2 justify-center text-center items-center">
             <p className="text-2xl font-bold">Progrida inteligente.</p>
             <p className="text-xl text-muted-foreground">
               Nossa plataforma foi feita para facilitar seus estudos.
