@@ -1,205 +1,201 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/client";
-import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { createClient } from "@/lib/client";
+import { cn } from "@/lib/utils";
+import { LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "./ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { LoaderPinwheel } from "lucide-react";
 
-const signupForm = z
+const SignUpSchema = z
   .object({
-    email: z.string().email(),
-    username: z.string().min(3, {
-      message: "O usuário deve conter no mínimo 3 caracteres.",
-    }),
+    username: z.string().min(3, "Mínimo de 3 caracteres."),
+    email: z.string().email("Insira um e-mail válido."),
     password: z
       .string()
-      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/, {
-        message:
-          "A senha deve conter no mínimo 8 caracteres contendo letras maiúsculas e minúsculas, números e caracteres especiais.",
-      }),
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/,
+        "A senha deve conter letras maiúsculas e minúsculas, números e caracteres especiais."
+      ),
     repeatPassword: z
       .string()
-      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/, {
-        message: "As senhas devem ser iguais.",
-      }),
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/,
+        "A senha deve conter letras maiúsculas e minúsculas, números e caracteres especiais."
+      ),
   })
   .superRefine(({ repeatPassword, password }, ctx) => {
     if (repeatPassword !== password) {
       ctx.addIssue({
         code: "custom",
-        message: "As senhas precisam ser iguais.",
+        message: "As senhas devem ser iguais.",
         path: ["repeatPassword"],
       });
     }
   });
 
-type SignUpProps = z.infer<typeof signupForm>;
+type SignUpProps = z.infer<typeof SignUpSchema>;
 
 export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(0);
-  const [topButton, setTopButton] = useState(-200);
-  const [showForm, setShowForm] = useState(false);
-  const [showHello, setShowHello] = useState(false);
-
+  const [genericError, setGenericError] = useState<string | null>(null);
   const router = useRouter();
-
   const form = useForm<SignUpProps>({
-    resolver: zodResolver(signupForm),
+    resolver: zodResolver(SignUpSchema),
     defaultValues: {
-      email: "",
       username: "",
+      email: "",
       password: "",
       repeatPassword: "",
     },
   });
 
   const handleSignUp = async (userData: SignUpProps) => {
-    console.log(userData);
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
     try {
+      setGenericError(null);
+      const supabase = createClient();
+      setIsLoading(true);
+      const userAlreadyExist = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("email", userData.email);
+      if (userAlreadyExist.data && userAlreadyExist.data.length >= 1)
+        return form.setError("email", {
+          type: "custom",
+          message: "E-mail já existente.",
+        });
+      if (userAlreadyExist.error) throw userAlreadyExist.error;
+
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
-        },
       });
-
-      const user = data.user;
-
-      if (user) {
-        const { error } = await supabase.from("profiles").insert({
-          username: userData.username,
-          user_id: user.id,
-          email: user.email,
-        });
-
-        if (error) throw error;
-      }
 
       if (error) throw error;
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        if (error.message === "invalid_credentials") {
-          setError("Usuário ou senha inválidos.");
-        } else {
-          setError("Um erro ocorreu");
-        }
-      }
+      console.log("Erro ao criar a conta: ", error);
+      setGenericError("Um erro ocorreu. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Form {...form}>
-      <p className="scroll-m-20 text-2xl mb-6 font-semibold tracking-tight transition-opacity duration-500 w-40">
-        Olá,
-      </p>
-      <form
-        onSubmit={form.handleSubmit(handleSignUp)}
-        className="transition-opacity flex flex-col duration-500 gap-6"
-      >
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Qual o seu e-mail?</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              {/* <FormDescription>
-              </FormDescription> */}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div
+      className={cn("flex flex-col gap-6 items-center", className)}
+      {...props}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Criar conta</CardTitle>
+          <CardDescription>Crie sua nova conta</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSignUp)}
+              className="flex flex-col gap-6"
+            >
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Qual o seu username?</FormLabel>
+                    <FormControl>
+                      <Input type="text" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Qual o seu e-mail?</FormLabel>
+                    <FormControl>
+                      <Input type="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Defina sua senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="repeatPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Repita sua senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Qual o seu username?</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              {/* <FormDescription>
-              </FormDescription> */}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Qual sua senha?</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              {/* <FormDescription>
-              </FormDescription> */}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="repeatPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Repita sua senha</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              {/* <FormDescription>
-              </FormDescription> */}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {/* <Button type="submit">Submit</Button> */}
-
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? <LoaderPinwheel className="animate-spin" /> : "Crie sua conta"}
-        </Button>
-        <div className="mt-4 text-center text-sm">
-          Já tem uma conta?{" "}
-          <Link href="/auth/login" className="underline underline-offset-4">
-            Entrar
-          </Link>
-        </div>
-      </form>
-    </Form>
+              <Button disabled={isLoading}>
+                {isLoading ? (
+                  <LoaderPinwheel className="animate-spin" />
+                ) : (
+                  "Criar conta"
+                )}
+              </Button>
+              {genericError && (
+                <span className="text-red-600">{genericError}</span>
+              )}
+              <div className="mt-4 text-center text-sm">
+                Já tem conta?{" "}
+                <Link
+                  href="/auth/login"
+                  className="underline underline-offset-4"
+                >
+                  Entrar
+                </Link>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
