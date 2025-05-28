@@ -181,7 +181,7 @@ export function SignUpForm({
                 )}
               </Button>
               {genericError && (
-                <span className="text-red-600">{genericError}</span>
+                <span className="text-red-600 text-center">{genericError}</span>
               )}
               <div className="mt-4 text-center text-sm">
                 Já tem conta?{" "}

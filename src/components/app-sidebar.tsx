@@ -21,7 +21,7 @@ import {
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
-import { useSession } from "@/hooks/loadSession";
+import { useSession } from "@/hooks/useSession";
 import { useSessionData } from "@/hooks/useSessionData";
 
 // import {useSession} from "@/hooks/useSession";
@@ -141,8 +141,8 @@ const dataMenu = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // const { data, error } = await supabase.auth.getSession();
 
-  const userData = useSessionData();
-  console.log(userData);
+  // const userData = useSessionData();
+  // console.log(userData);
 
   return (
     <Sidebar collapsible="icon" {...props}>

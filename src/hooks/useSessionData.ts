@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/client";
 import useSWR from "swr";
-import { useSession } from "./loadSession";
+import { useSession } from "./useSession";
 
 export const useSessionData = async () => {
   const supabase = createClient();
@@ -12,7 +12,7 @@ export const useSessionData = async () => {
     .select("username, email, avatar_url")
     .eq("user_id", user.id);
 
-  console.log(data, ' do profile');
+  console.log(data, " do profile");
 };
 
 // export const useSession = () => {
