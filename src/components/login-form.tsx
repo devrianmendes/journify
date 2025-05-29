@@ -29,7 +29,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { toast } from "sonner";
-import getUserData from "@/utils/getUserData";
+import getUserProfile from "@/utils/getUserProfile";
 
 const FormSchema = loginFormValidator();
 type SignInProps = z.infer<typeof FormSchema>;
@@ -62,7 +62,7 @@ export function LoginForm({
       });
       if (error) throw error;
 
-      const { data: profile, error: profileError } = await getUserData(
+      const { data: profile, error: profileError } = await getUserProfile(
         auth.user.id
       );
       if (profileError) throw profileError;
