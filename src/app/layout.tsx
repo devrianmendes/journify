@@ -28,8 +28,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center`}
       >
-        {children}
-        <Toaster />
+
+          {children}
+          <Toaster />
+
       </body>
     </html>
   );

@@ -29,7 +29,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { toast } from "sonner";
-import getUserData from "@/hooks/getUserData";
+import getUserData from "@/utils/getUserData";
 
 const FormSchema = loginFormValidator();
 type SignInProps = z.infer<typeof FormSchema>;
@@ -67,6 +67,7 @@ export function LoginForm({
       );
       if (profileError) throw profileError;
 
+      localStorage.setItem("userData", JSON.stringify(profile));
       toast.success(`Bem-vindo(a), ${profile.username}.`);
       router.push("/dashboard");
     } catch (error: unknown) {

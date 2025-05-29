@@ -1,4 +1,8 @@
 import { createClient } from "@/lib/client";
+import { UserProfile } from "@/types/loginType";
+import { PostgrestError } from "@supabase/supabase-js";
+
+
 
 const getUserData = async (userId: string) => {
   const supabase = createClient();
@@ -7,9 +11,9 @@ const getUserData = async (userId: string) => {
     .select("*")
     .eq("user_id", userId)
     .single();
-
+  // console.log(profile)
   return {
-    data: profile,
+    data: profile as UserProfile,
     error: profileError,
   };
 };
