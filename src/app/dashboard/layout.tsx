@@ -1,3 +1,4 @@
+import { ActivitySidebar } from "@/components/activity-sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import Header from "@/components/header";
 // import AppContent from "@/components/app-content";
@@ -51,11 +52,10 @@ export default function DashboardLayout({
               </Breadcrumb>
             </div>
           </header>
-          <div>
-            {children}
-          </div>
+          <div>{children}</div>
           {/* <AppContent>{children}</AppContent> */}
         </SidebarInset>
+        <ActivitySidebar />
       </SidebarProvider>
     </main>
   );

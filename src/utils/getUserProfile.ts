@@ -1,8 +1,7 @@
-"use server";
-import { createClient } from "@/lib/client";
+import { createClient } from "@/lib/supabase/client";
 import { UserProfile } from "@/types/loginType";
 
-const getUserProfile = async (userId: string) => {
+export const getUserProfile = async (userId: string) => {
   const supabase = createClient();
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -15,5 +14,3 @@ const getUserProfile = async (userId: string) => {
     error: profileError,
   };
 };
-
-export default getUserProfile;

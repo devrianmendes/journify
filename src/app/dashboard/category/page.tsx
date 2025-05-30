@@ -1,39 +1,15 @@
-import { AppSidebar } from "../../../components/app-sidebar";
-import { ActivitySidebar } from "../../../components/activity-sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { getCreatedCategories } from "@/utils/getCategoriesFunctions";
 
-export default function Page() {
+import CommunityCategories from "./components/communityCategories/communityCategories";
+import CreateCategories from "./components/createCategories";
+import DeleteCategory from "./components/deleteCategories";
+
+export default async function Page() {
   return (
-    <div className="w-full">
-      <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Categorias existentes</CardTitle>
-          <CardDescription>
-            Veja as categorias criadas pela comunidade.
-          </CardDescription>
-        </CardHeader>
-        <CardContent></CardContent>
-      </Card>
-    </div>
+    <section className="flex flex-wrap gap-5">
+      <CommunityCategories />
+      <CreateCategories />
+      <DeleteCategory />
+    </section>
   );
 }

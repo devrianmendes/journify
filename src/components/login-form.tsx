@@ -9,8 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/client";
-import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/supabase/utils";
 import { loginFormValidator } from "@/validators/signinValidator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthError } from "@supabase/supabase-js";
@@ -29,7 +29,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { toast } from "sonner";
-import getUserProfile from "@/utils/getUserProfile";
+import {getUserProfile} from "@/utils/getUserProfile";
 
 const FormSchema = loginFormValidator();
 type SignInProps = z.infer<typeof FormSchema>;

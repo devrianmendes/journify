@@ -8,8 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/client";
-import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/supabase/utils";
 import { LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,33 +26,7 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-
-const SignUpSchema = z
-  .object({
-    username: z.string().min(3, "Mínimo de 3 caracteres."),
-    email: z.string().email("Insira um e-mail válido."),
-    password: z
-      .string()
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/,
-        "A senha deve conter letras maiúsculas e minúsculas, números e caracteres especiais."
-      ),
-    repeatPassword: z
-      .string()
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/,
-        "A senha deve conter letras maiúsculas e minúsculas, números e caracteres especiais."
-      ),
-  })
-  .superRefine(({ repeatPassword, password }, ctx) => {
-    if (repeatPassword !== password) {
-      ctx.addIssue({
-        code: "custom",
-        message: "As senhas devem ser iguais.",
-        path: ["repeatPassword"],
-      });
-    }
-  });
+import { SignUpSchema } from "@/validators/signupValidator";
 
 type SignUpProps = z.infer<typeof SignUpSchema>;
 
@@ -73,20 +47,23 @@ export function SignUpForm({
     },
   });
 
-  const handleSignUp = async (userData: SignUpProps) => {
+  const onSubmit = async (userData: SignUpProps) => {
     try {
       setGenericError(null);
-      const supabase = createClient();
       setIsLoading(true);
+
+      const supabase = createClient();
       const userAlreadyExist = await supabase
         .from("profiles")
         .select("email")
         .eq("email", userData.email);
+
       if (userAlreadyExist.data && userAlreadyExist.data.length >= 1)
         return form.setError("email", {
           type: "custom",
           message: "E-mail já existente.",
         });
+
       if (userAlreadyExist.error) throw userAlreadyExist.error;
 
       const { data, error } = await supabase.auth.signUp({
@@ -117,7 +94,7 @@ export function SignUpForm({
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(handleSignUp)}
+              onSubmit={form.handleSubmit(onSubmit)}
               className="flex flex-col gap-6"
             >
               <FormField

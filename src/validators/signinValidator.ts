@@ -1,4 +1,3 @@
-import { LoginType } from "@/types/loginType";
 import { z } from "zod";
 
 export const loginFormValidator = () => {

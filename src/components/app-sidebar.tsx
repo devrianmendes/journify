@@ -21,14 +21,12 @@ import {
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
-import { createClient } from "@/lib/client";
+import { createClient } from "@/lib/supabase/client";
 import { UserProfile } from "@/types/loginType";
 
 // This is sample data.
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-
-  
   const { username, email, avatar_url } = JSON.parse(
     localStorage.getItem("userData")!
   );
