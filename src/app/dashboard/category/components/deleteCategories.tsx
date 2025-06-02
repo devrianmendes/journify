@@ -60,7 +60,7 @@ export default function DeleteCategory() {
   };
   return (
     <section>
-      a
+      
       {/* <Card className="w-[350px]">
           <CardHeader>
             <CardTitle>Criar categorias</CardTitle>

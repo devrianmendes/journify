@@ -1,0 +1,53 @@
+Lógica do Banco de Dados Journify
+
+1. Usuários
+    - O Supabase já cria a tabela de usuários (auth.users).
+    - Cada usuário tem um perfil extra em profiles, com nome, email, avatar, bio, etc.
+
+2. Categorias (categories)
+    - Categorias são os grupos que organizam as skills (ex: Frontend, Backend).
+    - Elas são compartilhadas entre os usuários para evitar repetição.
+    - Cada categoria tem um criador (quem cadastrou) mas pode ser usada por qualquer usuário.
+    - Possuem nome, slug (nome URL-friendly), cor e data de criação.
+
+3. Skills (skills)
+    - Skills são os tópicos de estudo, como "React", "Node.js", "Comunicação".
+    - Também são únicas e globais, criadas por um usuário, mas usadas por muitos.
+    - Cada skill pertence a uma categoria e pode ter descrição e link para material.
+        - Exemplo: Só existe uma skill "React" para todos usarem.
+
+4. Progresso das Skills por Usuário (user_skills)
+    - Aqui fica o status de cada skill para cada usuário.
+    - Um usuário pode ter várias skills com diferentes status: “to_study”, “studying”, “to_review”, “mastered”.
+    - Pode guardar notas pessoais, datas de início e conclusão.
+    - Essa tabela conecta usuário e skill, evitando repetir skills para cada usuário.
+        - Exemplo: João está estudando “React” (status: studying), Ana já revisou “React” (status: to_review).
+
+5. Feed de Atividades (feeds)
+    - Mostra atualizações e ações dos usuários, como “começou a estudar React” ou “marcou skill como revisada”.
+    - Cada entrada é ligada a um usuário e uma skill, e tem um tipo (novo, status atualizado, nota adicionada).
+    - Serve para montar o feed social, mostrando o que seus amigos estão fazendo.
+
+6. Seguidores (follows)
+    - Representa quem segue quem.
+    - Um usuário pode seguir vários e ser seguido por vários.
+    - É uma tabela de relacionamento muitos-para-muitos com chave composta (followed_id + follower_id).
+
+7. Mensagens (messages)
+    - Guarda as mensagens trocadas entre usuários.
+    - Cada mensagem tem remetente, destinatário, conteúdo, se foi lida ou não, e timestamps.
+    - Permite chat assíncrono (mensagens enviadas e recebidas ficam salvas).
+
+8. Notas Pessoais (notes)
+    - Notas que cada usuário adiciona às suas skills.
+    - São privadas, só o usuário que criou vê.
+    - Podem ajudar a lembrar detalhes, dicas ou comentários pessoais sobre a skill.
+
+
+Fluxos principais da aplicação usando essa estrutura
+    - Um usuário cadastra uma nova skill (ou usa uma existente).
+    - O usuário marca o status da skill (ex: estudando) e adiciona notas pessoais.
+    - As ações do usuário geram entradas no feed para mostrar no social.
+    - O usuário pode seguir outras pessoas e ver o progresso delas no feed.
+    - Usuários podem trocar mensagens privadas.
+    - Categorias organizam as skills, mantendo tudo estruturado e compartilhado.

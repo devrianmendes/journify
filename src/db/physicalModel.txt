@@ -1,0 +1,98 @@
+-- Enum para status do progresso da skill
+CREATE TYPE skill_status AS ENUM (
+  'to_study',
+  'studying',
+  'to_review',
+  'mastered'
+);
+
+-- Enum para tipos de feed
+CREATE TYPE feed_type AS ENUM (
+  'new_item',
+  'status_updated',
+  'note_added'
+);
+
+-- Tabela de perfis extras dos usuários
+CREATE TABLE profiles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  username text UNIQUE NOT NULL,
+  email text NOT NULL,
+  bio text,
+  avatar_url text,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Categorias globais (compartilhadas)
+CREATE TABLE categories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL UNIQUE,
+  slug text NOT NULL UNIQUE,
+  color text,
+  creator_id uuid REFERENCES auth.users(id),
+  is_public boolean DEFAULT true,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Skills globais (compartilhadas)
+CREATE TABLE skills (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL UNIQUE,
+  description text,
+  link text,
+  category_id uuid REFERENCES categories(id),
+  creator_id uuid REFERENCES auth.users(id),
+  created_at timestamptz DEFAULT now()
+);
+
+-- Status e progresso das skills de cada usuário
+CREATE TABLE user_skills (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  skill_id uuid REFERENCES skills(id) ON DELETE CASCADE,
+  status skill_status NOT NULL DEFAULT 'to_study',
+  notes text,
+  started_at timestamptz,
+  completed_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE(user_id, skill_id)
+);
+
+-- Feed de ações do usuário
+CREATE TABLE feeds (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  type feed_type NOT NULL,
+  skill_id uuid REFERENCES skills(id),
+  created_at timestamptz DEFAULT now()
+);
+
+-- Seguidores
+CREATE TABLE follows (
+  followed_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  follower_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at timestamptz DEFAULT now(),
+  PRIMARY KEY (followed_id, follower_id)
+);
+
+-- Mensagens entre usuários
+CREATE TABLE messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  receiver_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  content text NOT NULL,
+  is_read boolean DEFAULT false,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- Notas pessoais para skills
+CREATE TABLE notes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  skill_id uuid REFERENCES skills(id) ON DELETE CASCADE,
+  content text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
