@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/supabase/utils";
 import { LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
@@ -27,6 +26,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { SignUpSchema } from "@/validators/signupValidator";
+import { trpc } from "@/lib/trpc/trpcClient";
 
 type SignUpProps = z.infer<typeof SignUpSchema>;
 
@@ -47,40 +47,65 @@ export function SignUpForm({
     },
   });
 
-  const onSubmit = async (userData: SignUpProps) => {
-    try {
-      setGenericError(null);
-      setIsLoading(true);
-
-      const supabase = createClient();
-      const userAlreadyExist = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("email", userData.email);
-
-      if (userAlreadyExist.data && userAlreadyExist.data.length >= 1)
-        return form.setError("email", {
-          type: "custom",
-          message: "E-mail já existente.",
-        });
-
-      if (userAlreadyExist.error) throw userAlreadyExist.error;
-
-      const { data, error } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-      });
-
-      if (error) throw error;
+  const { mutate } = trpc.auth.signup.useMutation({
+    onSuccess: (data) => {
+      console.log("Usuário criado com sucesso!", data);
       router.push("/auth/sign-up-success");
-    } catch (error: unknown) {
-      console.log("Erro ao criar a conta: ", error);
-      setGenericError("Um erro ocorreu. Tente novamente.");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+    onError: (err) => {
+      if (err.message.includes("e-mail de confirmação.")) {
+        setGenericError(err.message);
+      } else {
+        setGenericError("Erro ao criar conta. Verifique o log.");
+        console.error("Erro ao criar conta:", err.message);
+        console.log(err.message);
+      }
+    },
+  });
+
+  const onSubmit = async (userData: SignUpProps) => {
+    setGenericError(null);
+    setIsLoading(true);
+    mutate({
+      email: userData.email,
+      password: userData.password,
+      repeatPassword: userData.repeatPassword,
+      username: userData.username,
+    });
+    setIsLoading(false);
   };
 
+  // try {
+  // setGenericError(null);
+  // setIsLoading(true);
+
+  // const supabase = createClient();
+  // const { data, error } = await supabase.auth.signUp({
+  //   email: userData.email,
+  //   password: userData.password,
+  // });
+
+  // if (error) {
+  //   if (error.message.toLowerCase().includes("user already registered")) {
+  //     form.setError("email", {
+  //       type: "custom",
+  //       message: "E-mail já está em uso.",
+  //     });
+  //   } else {
+  //     setGenericError("Erro ao criar conta. Tente novamente.");
+  //   }
+
+  //   setIsLoading(false);
+  //   return;
+  // }
+
+  // router.push("/auth/sign-up-success");
+  // } catch (error: unknown) {
+  //   console.log("Erro ao criar a conta: ", error);
+  //   setGenericError("Um erro ocorreu. Tente novamente.");
+  // } finally {
+  //   setIsLoading(false);
+  // }
   return (
     <div
       className={cn("flex flex-col gap-6 items-center", className)}

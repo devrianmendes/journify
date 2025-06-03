@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/supabase/utils";
-import { loginFormValidator } from "@/validators/signinValidator";
+import { SignInSchema } from "@/validators/signinValidator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthError } from "@supabase/supabase-js";
 import { LoaderPinwheel } from "lucide-react";
@@ -31,8 +31,7 @@ import {
 import { toast } from "sonner";
 import {getUserProfile} from "@/utils/getUserProfile";
 
-const FormSchema = loginFormValidator();
-type SignInProps = z.infer<typeof FormSchema>;
+type SignInProps = z.infer<typeof SignInSchema>;
 
 export function LoginForm({
   className,
@@ -43,7 +42,7 @@ export function LoginForm({
 
   const router = useRouter();
   const form = useForm<SignInProps>({
-    resolver: zodResolver(FormSchema),
+    resolver: zodResolver(SignInSchema),
     defaultValues: {
       email: "",
       password: "",

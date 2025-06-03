@@ -11,6 +11,7 @@ export default function Wrapper() {
     const getData = async () => {
       const { data } = await getCreatedCategories();
 
+      if(!data) throw Error("Erro (verificar)");
       setCategory(data);
     };
 
