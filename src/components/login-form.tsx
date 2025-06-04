@@ -30,6 +30,7 @@ import {
 } from "./ui/form";
 import { toast } from "sonner";
 import {getUserProfile} from "@/utils/getUserProfile";
+import { trpc, trpcClient } from "@/lib/trpc/trpcClient";
 
 type SignInProps = z.infer<typeof SignInSchema>;
 
@@ -38,7 +39,6 @@ export function LoginForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [genericError, setGenericError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const form = useForm<SignInProps>({
@@ -49,41 +49,60 @@ export function LoginForm({
     },
   });
 
+  const { mutate, isPending } = trpc.auth.signin.useMutation({
+    onSuccess: (data) => {
+      console.log("Usuário logado com sucesso!", data);
+      // localStorage.setItem("userData", JSON.stringify(profile));
+    //   toast.success(`Bem-vindo(a), ${profile.username}.`);
+    //   router.push("/dashboard");
+    },
+    onError: (error) => {
+      setGenericError(error.message);
+    },
+  });
+
   const onSubmit = async (loginData: SignInProps) => {
-    const supabase = createClient();
-    setIsLoading(true);
+
+
     setGenericError(null);
+    console.log(isPending)
 
-    try {
-      const { data: auth, error } = await supabase.auth.signInWithPassword({
-        email: loginData.email,
-        password: loginData.password,
-      });
-      if (error) throw error;
+    mutate({
+      email: loginData.email,
+      password: loginData.password,
+    });
 
-      const { data: profile, error: profileError } = await getUserProfile(
-        auth.user.id
-      );
-      if (profileError) throw profileError;
 
-      localStorage.setItem("userData", JSON.stringify(profile));
-      toast.success(`Bem-vindo(a), ${profile.username}.`);
-      router.push("/dashboard");
-    } catch (error: unknown) {
-      if (error instanceof AuthError) {
-        setGenericError(
-          error.code === "invalid_credentials"
-            ? "Usuário ou senha inválidos."
-            : `Erro genérico: ${error.message}`
-        );
-        console.log(error.code);
-      } else {
-        setGenericError(`Erro genérico. Verifique o log.`);
-        console.log(error);
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    // try {
+    //   const { data: auth, error } = await supabase.auth.signInWithPassword({
+    //     email: loginData.email,
+    //     password: loginData.password,
+    //   });
+    //   if (error) throw error;
+
+    //   const { data: profile, error: profileError } = await getUserProfile(
+    //     auth.user.id
+    //   );
+    //   if (profileError) throw profileError;
+
+    //   localStorage.setItem("userData", JSON.stringify(profile));
+    //   toast.success(`Bem-vindo(a), ${profile.username}.`);
+    //   router.push("/dashboard");
+    // } catch (error: unknown) {
+    //   if (error instanceof AuthError) {
+    //     setGenericError(
+    //       error.code === "invalid_credentials"
+    //         ? "Usuário ou senha inválidos."
+    //         : `Erro genérico: ${error.message}`
+    //     );
+    //     console.log(error.code);
+    //   } else {
+    //     setGenericError(`Erro genérico. Verifique o log.`);
+    //     console.log(error);
+    //   }
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   return (
@@ -125,8 +144,8 @@ export function LoginForm({
                   </FormItem>
                 )}
               />
-              <Button disabled={isLoading}>
-                {isLoading ? (
+              <Button disabled={isPending}>
+                {isPending ? (
                   <LoaderPinwheel className="animate-spin" />
                 ) : (
                   "Entrar"

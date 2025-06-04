@@ -34,7 +34,7 @@ export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [genericError, setGenericError] = useState<string | null>(null);
   const router = useRouter();
   const form = useForm<SignUpProps>({
@@ -47,65 +47,28 @@ export function SignUpForm({
     },
   });
 
-  const { mutate } = trpc.auth.signup.useMutation({
+  const { mutate, isPending } = trpc.auth.signup.useMutation({
     onSuccess: (data) => {
       console.log("Usuário criado com sucesso!", data);
       router.push("/auth/sign-up-success");
     },
     onError: (err) => {
-      if (err.message.includes("e-mail de confirmação.")) {
-        setGenericError(err.message);
-      } else {
-        setGenericError("Erro ao criar conta. Verifique o log.");
-        console.error("Erro ao criar conta:", err.message);
-        console.log(err.message);
-      }
+      setGenericError(err.message)
     },
   });
 
   const onSubmit = async (userData: SignUpProps) => {
+    // setIsLoading(true);
     setGenericError(null);
-    setIsLoading(true);
     mutate({
       email: userData.email,
       password: userData.password,
       repeatPassword: userData.repeatPassword,
       username: userData.username,
     });
-    setIsLoading(false);
+    // setIsLoading(false);
   };
 
-  // try {
-  // setGenericError(null);
-  // setIsLoading(true);
-
-  // const supabase = createClient();
-  // const { data, error } = await supabase.auth.signUp({
-  //   email: userData.email,
-  //   password: userData.password,
-  // });
-
-  // if (error) {
-  //   if (error.message.toLowerCase().includes("user already registered")) {
-  //     form.setError("email", {
-  //       type: "custom",
-  //       message: "E-mail já está em uso.",
-  //     });
-  //   } else {
-  //     setGenericError("Erro ao criar conta. Tente novamente.");
-  //   }
-
-  //   setIsLoading(false);
-  //   return;
-  // }
-
-  // router.push("/auth/sign-up-success");
-  // } catch (error: unknown) {
-  //   console.log("Erro ao criar a conta: ", error);
-  //   setGenericError("Um erro ocorreu. Tente novamente.");
-  // } finally {
-  //   setIsLoading(false);
-  // }
   return (
     <div
       className={cn("flex flex-col gap-6 items-center", className)}
@@ -175,8 +138,8 @@ export function SignUpForm({
                 )}
               />
 
-              <Button disabled={isLoading}>
-                {isLoading ? (
+              <Button disabled={isPending}>
+                {isPending ? (
                   <LoaderPinwheel className="animate-spin" />
                 ) : (
                   "Criar conta"
