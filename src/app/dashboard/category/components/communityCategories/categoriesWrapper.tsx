@@ -1,32 +1,29 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
+import { trpc } from "@/lib/trpc/trpcClient";
 import { CategoryType } from "@/types/categoryType";
 import { getCreatedCategories } from "@/utils/getCategoriesFunctions";
 import { useEffect, useState } from "react";
 
 export default function Wrapper() {
-  const [category, setCategory] = useState<CategoryType>([]);
+  // const [category, setCategory] = useState<CategoryType>([]);
 
-  useEffect(() => {
-    const getData = async () => {
-      const { data } = await getCreatedCategories();
-
-      if(!data) throw Error("Erro (verificar)");
-      setCategory(data);
-    };
-
-    getData();
-  }, [category]);
+  const { data } = trpc.category.getCreatedCategories.useQuery();
+  
   return (
     <div className={`flex flex-wrap gap-3`}>
-      {category!.map((eachCategory) => (
-        <Badge
-          style={{ backgroundColor: eachCategory.color }}
-          key={eachCategory.id}
-        >
-          {eachCategory.name}
-        </Badge>
-      ))}
+      {data ? (
+        data.data.map((eachCategory) => (
+          <Badge
+            style={{ backgroundColor: eachCategory.color }}
+            key={eachCategory.id}
+          >
+            {eachCategory.name}
+          </Badge>
+        ))
+      ) : (
+        <p>Sem categorias criadas.</p>
+      )}
     </div>
   );
 }

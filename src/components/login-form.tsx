@@ -29,7 +29,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { toast } from "sonner";
-import {getUserProfile} from "@/utils/getUserProfile";
+import { getUserProfile } from "@/utils/getUserProfile";
 import { trpc, trpcClient } from "@/lib/trpc/trpcClient";
 
 type SignInProps = z.infer<typeof SignInSchema>;
@@ -51,58 +51,23 @@ export function LoginForm({
 
   const { mutate, isPending } = trpc.auth.signin.useMutation({
     onSuccess: (data) => {
-      console.log("Usuário logado com sucesso!", data);
-      // localStorage.setItem("userData", JSON.stringify(profile));
-    //   toast.success(`Bem-vindo(a), ${profile.username}.`);
-    //   router.push("/dashboard");
+      localStorage.setItem("userData", JSON.stringify(data.data[0]));
+      toast.success(`Bem-vindo(a), ${data.data[0].username}.`);
+      router.push("/dashboard");
     },
     onError: (error) => {
       setGenericError(error.message);
+      console.log(error);
     },
   });
 
   const onSubmit = async (loginData: SignInProps) => {
-
-
     setGenericError(null);
-    console.log(isPending)
 
     mutate({
       email: loginData.email,
       password: loginData.password,
     });
-
-
-    // try {
-    //   const { data: auth, error } = await supabase.auth.signInWithPassword({
-    //     email: loginData.email,
-    //     password: loginData.password,
-    //   });
-    //   if (error) throw error;
-
-    //   const { data: profile, error: profileError } = await getUserProfile(
-    //     auth.user.id
-    //   );
-    //   if (profileError) throw profileError;
-
-    //   localStorage.setItem("userData", JSON.stringify(profile));
-    //   toast.success(`Bem-vindo(a), ${profile.username}.`);
-    //   router.push("/dashboard");
-    // } catch (error: unknown) {
-    //   if (error instanceof AuthError) {
-    //     setGenericError(
-    //       error.code === "invalid_credentials"
-    //         ? "Usuário ou senha inválidos."
-    //         : `Erro genérico: ${error.message}`
-    //     );
-    //     console.log(error.code);
-    //   } else {
-    //     setGenericError(`Erro genérico. Verifique o log.`);
-    //     console.log(error);
-    //   }
-    // } finally {
-    //   setIsLoading(false);
-    // }
   };
 
   return (

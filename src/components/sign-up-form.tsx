@@ -34,7 +34,6 @@ export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  // const [isLoading, setIsLoading] = useState(false);
   const [genericError, setGenericError] = useState<string | null>(null);
   const router = useRouter();
   const form = useForm<SignUpProps>({
@@ -49,16 +48,14 @@ export function SignUpForm({
 
   const { mutate, isPending } = trpc.auth.signup.useMutation({
     onSuccess: (data) => {
-      console.log("Usuário criado com sucesso!", data);
       router.push("/auth/sign-up-success");
     },
     onError: (err) => {
-      setGenericError(err.message)
+      setGenericError(err.message);
     },
   });
 
   const onSubmit = async (userData: SignUpProps) => {
-    // setIsLoading(true);
     setGenericError(null);
     mutate({
       email: userData.email,
@@ -66,7 +63,6 @@ export function SignUpForm({
       repeatPassword: userData.repeatPassword,
       username: userData.username,
     });
-    // setIsLoading(false);
   };
 
   return (

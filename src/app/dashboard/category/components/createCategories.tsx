@@ -17,24 +17,23 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import { GradientPicker } from "@/components/gradient-picker";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CategorySchema } from "@/validators/createCategoryValidator";
+import { CategorySchema } from "@/validators/categoryValidator";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
 import { LoaderPinwheel } from "lucide-react";
-import { UserProfile } from "@/types/loginType";
+import { trpc } from "@/lib/trpc/trpcClient";
 
 type NewCategoryType = z.infer<typeof CategorySchema>;
 
 export default function CreateCategories() {
-  const [isLoading, setIsLoading] = useState(false); //Animação no botão de criar
   const [genericError, setGenericError] = useState<string | null>(null); //Erro vindo do banco
+  const utils = trpc.useUtils();
+
   const form = useForm({
     resolver: zodResolver(CategorySchema),
     defaultValues: {
@@ -42,28 +41,37 @@ export default function CreateCategories() {
       color: "",
     },
   });
+
+  const { mutate, isPending } = trpc.category.createCategory.useMutation({
+    onSuccess: (data) => {
+      utils.category.getCreatedCategories.invalidate();
+    },
+    onError: (error) => {
+      setGenericError("Um erro ocorreu. Tente novamente.");
+    },
+  });
+
   const exampleBadge = form.watch("name"); //Reatividade na badge de exemplo
 
   const onSubmit = async (newCategoryData: NewCategoryType) => {
     try {
-      setGenericError(null); //Limpando erro vindo do banco
-      setIsLoading(true); //Botão de criar
-      const supabase = createClient();
-      const userData: UserProfile  = JSON.parse(localStorage.getItem("userData")!);
+      setGenericError(null); //Limpando erro do estado
+      let userData = localStorage.getItem("userData");
 
-      const { data, error } = await supabase.from("categories").insert({
+      if (!userData) {
+        return;
+      }
+
+      mutate({
         name: newCategoryData.name,
-        slug: newCategoryData.name.toLowerCase().split(" ").join('-'),
+        slug: newCategoryData.name.toLowerCase().split(" ").join("-"),
         color: newCategoryData.color,
-        user_id: userData.user_id
+        creator_id: JSON.parse(userData).user_id,
+        is_public: true,
       });
-
-      if (error) throw error;
     } catch (error: unknown) {
       console.log("Erro ao criar a conta: ", error);
       setGenericError("Um erro ocorreu. Tente novamente.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -128,14 +136,12 @@ export default function CreateCategories() {
                     <FormMessage />
                   </FormItem>
                 )}
-                />
-                {genericError && (
-                  <span className="text-red-600 text-center">
-                    {genericError}
-                  </span>
-                )}
-              <Button disabled={isLoading}>
-                {isLoading ? (
+              />
+              {genericError && (
+                <span className="text-red-600 text-center">{genericError}</span>
+              )}
+              <Button disabled={isPending}>
+                {isPending ? (
                   <LoaderPinwheel className="animate-spin" />
                 ) : (
                   "Criar categoria"
