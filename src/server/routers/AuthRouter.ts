@@ -2,7 +2,8 @@ import { SignUpSchema } from "@/validators/signupValidator";
 import { publicProcedure, router } from "../trpc";
 import { SignInSchema } from "@/validators/signinValidator";
 import { TRPCError } from "@trpc/server";
-import { db } from "@/lib/drizzle/drizzle.config";
+import { db } from "@/db/index";
+
 import { profiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -11,6 +12,17 @@ export const AuthRouter = router({
     .input(SignUpSchema)
     .mutation(async ({ input, ctx }) => {
       try {
+        const usernameAlreadyExist = await db.query.profiles.findFirst({
+          where: eq(profiles.username, input.username),
+        });
+
+        if (usernameAlreadyExist) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Esse username já existe.",
+          });
+        }
+
         const { data, error } = await ctx.supabase.auth.signUp({
           email: input.email,
           password: input.password,
@@ -21,7 +33,10 @@ export const AuthRouter = router({
           },
         });
 
-        if (data.user && Object.keys(data.user.user_metadata).length <= 0) {
+        if (
+          data.user &&
+          (!data.user.identities || data.user.identities.length === 0)
+        ) {
           throw new TRPCError({
             code: "CONFLICT",
             message: "E-mail já está em uso.",
@@ -50,11 +65,22 @@ export const AuthRouter = router({
           });
         }
 
+        await db.insert(profiles).values({
+          username: input.username,
+          email: input.email,
+          user_id: data.user?.id || "",
+        });
+
         return { data: data, error: error };
       } catch (error: unknown) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        // console.log(error)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Erro interno do servidor. Tente novamente mais tarde.",
+          // message: error.message,
         });
       }
     }),
@@ -127,6 +153,9 @@ export const AuthRouter = router({
           };
         }
       } catch (error: unknown) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Erro interno do servidor. Tente novamente mais tarde.",

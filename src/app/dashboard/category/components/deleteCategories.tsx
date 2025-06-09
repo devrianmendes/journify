@@ -1,5 +1,4 @@
 "use client";
-import { GradientPicker } from "@/components/gradient-picker";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,112 +13,151 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  Form,
+  FormDescription,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { CategoryType } from "@/types/categoryType";
-import { UserProfile } from "@/types/loginType";
-import { getCreatedCategories } from "@/utils/getCategoriesFunctions";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
-import { Badge, LoaderPinwheel } from "lucide-react";
+import { trpc } from "@/lib/trpc/trpcClient";
+import { UserProfile } from "@/types/loginType";
+import {
+  DeleteCategorySchema,
+  DeleteCategoryType,
+} from "@/validators/categoryValidator";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoaderPinwheel } from "lucide-react";
+
 import { useEffect, useState } from "react";
-import { Form } from "react-hook-form";
-import { getOwnCreatedCategories } from "@/utils/getCategoriesFunctions";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function DeleteCategory() {
-  const [category, setCategory] = useState<CategoryType>([]);
-  const [isLoading, setIsLoading] = useState(false); //Animação no botão de criar
   const [genericError, setGenericError] = useState<string | null>(null); //Erro vindo do banco
+  const form = useForm({
+    resolver: zodResolver(DeleteCategorySchema),
+    defaultValues: {
+      user_id: "",
+      category_id: "",
+    },
+  });
+  const utils = trpc.useUtils();
+  const storedData = localStorage.getItem("userData");
+  if (!storedData) {
+    const supabase = createClient();
+    supabase.auth.signOut();
+    return;
+  }
+  const userData: UserProfile = JSON.parse(storedData);
 
-  getOwnCreatedCategories();
+  useEffect(() => {
+    form.setValue("user_id", userData.user_id);
+  }, []);
 
-  console.log(category);
+  const { data } = trpc.category.getOwnCreatedGategories.useQuery({
+    user_id: userData.user_id,
+  });
 
-  const onSubmit = async (newCategoryData: any) => {
+  const { mutate, isPending: pendingDelete } =
+    trpc.category.deleteCategory.useMutation({
+      onSuccess: (data) => {
+        toast.success(`Categoria deletada.`);
+        utils.category.getOwnCreatedGategories.invalidate();
+        utils.category.getCreatedCategories.invalidate();
+      },
+      onError: (error) => {
+        console.log(error, "erro no useMutation");
+      },
+    });
+
+  const onSubmit = async (deleteCategoryData: DeleteCategoryType) => {
     try {
-      setGenericError(null); //Limpando erro vindo do banco
-      setIsLoading(true); //Botão de criar
-      const supabase = createClient();
-      const userData: UserProfile = JSON.parse(
-        localStorage.getItem("userData")!
-      );
-
-      const { data, error } = await supabase.from("categories").insert({
-        name: newCategoryData.name,
-        slug: newCategoryData.name.toLowerCase().split(" ").join("-"),
-        color: newCategoryData.color,
-        user_id: userData.user_id,
-      });
-
-      if (error) throw error;
-    } catch (error: unknown) {
-      console.log("Erro ao criar a conta: ", error);
-      setGenericError("Um erro ocorreu. Tente novamente.");
-    } finally {
-      setIsLoading(false);
-    }
+    } catch (error: unknown) {}
+    mutate({
+      user_id: deleteCategoryData.user_id,
+      category_id: deleteCategoryData.category_id,
+    });
   };
-  return (
-    <section>
-      
-      {/* <Card className="w-[350px]">
-          <CardHeader>
-            <CardTitle>Criar categorias</CardTitle>
-            <CardDescription>Crie uma categoria específica.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            
-                <FormField
-                  control={form.control}
-                  name="color"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cor da badge</FormLabel>
-                      <FormControl>
-                        <div className="flex w-full items-center gap-5">
-                          <GradientPicker
-                            background={field.value}
-                            setBackground={field.onChange}
-                            {...field}
-                          />
-                          <div className="flex gap-3">
-                            Ex:{" "}
-                            {field.value?.includes("linear-gradient") ? (
-                              <Badge
-                                style={{
-                                  backgroundImage: field.value,
-                                }}
-                              >
-                                {exampleBadge ? exampleBadge : "typescript"}
-                              </Badge>
-                            ) : (
-                              <Badge style={{ backgroundColor: field.value }}>
-                                {exampleBadge ? exampleBadge : "typescript"}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </FormControl>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {genericError && (
-                  <span className="text-red-600 text-center">
-                    {genericError}
-                  </span>
+  return (
+    <section className="w-full">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Deletar categorias</CardTitle>
+          <CardDescription>
+            Delete uma categoria que você criou.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="w-2/3 space-y-6"
+            >
+              <FormField
+                control={form.control}
+                name="category_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        {!data ? (
+                          <SelectTrigger disabled>
+                            <SelectValue placeholder="Sem categoria criada." />
+                          </SelectTrigger>
+                        ) : (
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a categoria" />
+                          </SelectTrigger>
+                        )}
+                      </FormControl>
+                      <SelectContent>
+                        {data &&
+                          data.data.map((eachCategory) => (
+                            <SelectItem
+                              key={eachCategory.id}
+                              value={eachCategory.id}
+                            >
+                              {eachCategory.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      <p className="block">
+                        Apenas categorias criadas por você poderão ser
+                        deletadas.
+                      </p>
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
                 )}
-                <Button disabled={isLoading}>
-                  {isLoading ? (
-                    <LoaderPinwheel className="animate-spin" />
-                  ) : (
-                    "Criar categoria"
-                  )}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card> */}
+              />
+
+              {genericError && (
+                <span className="text-red-600 text-center">{genericError}</span>
+              )}
+              <Button disabled={pendingDelete} className="min-w-[130px]">
+                {pendingDelete ? (
+                  <LoaderPinwheel className="animate-spin" />
+                ) : (
+                  "Deletar categoria"
+                )}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </section>
   );
 }

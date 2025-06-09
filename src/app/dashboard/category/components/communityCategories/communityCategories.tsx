@@ -10,8 +10,8 @@ import Wrapper from "./categoriesWrapper";
 export default async function CommunityCategories() {
   
   return (
-    <div>
-      <Card className="w-[350px]">
+    <div className="w-full">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Categorias existentes</CardTitle>
           <CardDescription>

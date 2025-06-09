@@ -9,11 +9,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/supabase/utils";
 import { SignInSchema } from "@/validators/signinValidator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AuthError } from "@supabase/supabase-js";
 import { LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,8 +27,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { toast } from "sonner";
-import { getUserProfile } from "@/utils/getUserProfile";
-import { trpc, trpcClient } from "@/lib/trpc/trpcClient";
+import { trpc } from "@/lib/trpc/trpcClient";
 
 type SignInProps = z.infer<typeof SignInSchema>;
 
@@ -122,10 +119,10 @@ export function LoginForm({
               <div className="mt-4 text-center text-sm">
                 Ainda não possui conta?{" "}
                 <Link
-                  href="/auth/login"
+                  href="/auth/sign-up"
                   className="underline underline-offset-4"
                 >
-                  Entrar
+                  Criar
                 </Link>
               </div>
             </form>

@@ -1,9 +1,6 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc/trpcClient";
-import { CategoryType } from "@/types/categoryType";
-import { getCreatedCategories } from "@/utils/getCategoriesFunctions";
-import { useEffect, useState } from "react";
 
 export default function Wrapper() {
   // const [category, setCategory] = useState<CategoryType>([]);

@@ -44,10 +44,10 @@ export default function CreateCategories() {
 
   const { mutate, isPending } = trpc.category.createCategory.useMutation({
     onSuccess: (data) => {
-      utils.category.getCreatedCategories.invalidate();
+      utils.category.invalidate();
     },
     onError: (error) => {
-      setGenericError("Um erro ocorreu. Tente novamente.");
+      setGenericError(error.message);
     },
   });
 
@@ -76,8 +76,8 @@ export default function CreateCategories() {
   };
 
   return (
-    <div>
-      <Card className="w-[350px]">
+    <section className="w-full">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Criar categorias</CardTitle>
           <CardDescription>Crie uma categoria específica.</CardDescription>
@@ -140,7 +140,7 @@ export default function CreateCategories() {
               {genericError && (
                 <span className="text-red-600 text-center">{genericError}</span>
               )}
-              <Button disabled={isPending}>
+              <Button disabled={isPending} className="min-w-[130px]">
                 {isPending ? (
                   <LoaderPinwheel className="animate-spin" />
                 ) : (
@@ -151,6 +151,6 @@ export default function CreateCategories() {
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </section>
   );
 }
