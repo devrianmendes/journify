@@ -1,24 +1,26 @@
 "use client";
-
-import type * as React from "react";
-import { MessageCircle, BookOpen, Trophy, Code, Zap, Star } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Sidebar,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from "./ui/sidebar";
 import { cn } from "@/lib/supabase/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { BookOpen, Code, MessageCircle, Star, Trophy, Zap } from "lucide-react";
+import { Button } from "./ui/button";
 
-// Dados de exemplo para o feed de atividades
 const activities = [
   {
     id: 1,
@@ -92,102 +94,109 @@ const activities = [
   },
 ];
 
-// Garantir geração da classe pelo Tailwind:
-// [right-[-calc(var(--sidebar-width))]]
-
-export function ActivitySidebar({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
+export function ActivitySidebar(props: React.ComponentProps<"div">) {
   const { openSecondary, setOpenSecondary, isMobile } = useSidebar();
 
-  if (isMobile)
+  if (isMobile) {
     return (
-      <div>
-        <div
-          className={cn(
-          "fixed inset-y-0 right-0 z-50 w-[var(--sidebar-width)] h-svh bg-sidebar text-sidebar-foreground flex flex-col border-l transition-transform duration-200 ease-linear",
-          openSecondary
-            ? "translate-x-0"
-            : "translate-x-full", // Esconde fora da tela à direita
-          props.className
-        )}
-        style={{ touchAction: "none" }}
-          {...props}
+      <Sheet open={openSecondary} onOpenChange={setOpenSecondary}>
+        <SheetContent
+          data-sidebar="activity-sidebar"
+          data-slot="activity-sidebar"
+          data-mobile="true"
+          className="bg-sidebar text-sidebar-foreground w-[var(--sidebar-width)] p-0"
+          style={
+            {
+              "--sidebar-width": "18rem", // ou SIDEBAR_WIDTH_MOBILE
+            } as React.CSSProperties
+          }
+          side="right"
         >
-          <SidebarHeader>
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-lg font-semibold">
-                Feed de Atividades
-              </SidebarGroupLabel>
-            </SidebarGroup>
-          </SidebarHeader>
+          <SheetHeader className="sr-only">
+            <SheetTitle>Atividades</SheetTitle>
+            <SheetDescription>Feed de atividades</SheetDescription>
+          </SheetHeader>
+          <div className="flex h-full w-full flex-col">
+            <SidebarHeader>
+              <SidebarGroup>
+                <SidebarGroupLabel className="text-lg font-semibold">
+                  Feed de Atividades
+                </SidebarGroupLabel>
+              </SidebarGroup>
+            </SidebarHeader>
 
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <ScrollArea className="h-full">
-                  <div className="space-y-4 p-2">
-                    {activities.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="flex items-start space-x-3 rounded-lg p-3 hover:bg-sidebar-accent transition-colors"
-                      >
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={activity.avatar || "/placeholder.svg"}
-                            alt={activity.user}
-                          />
-                          <AvatarFallback>
-                            {activity.user
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center space-x-1">
-                            <activity.icon
-                              className={`h-4 w-4 ${activity.color}`}
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <ScrollArea className="h-full">
+                    <div className="space-y-4 p-2">
+                      {activities.map((activity) => (
+                        <div
+                          key={activity.id}
+                          className="flex items-start space-x-3 rounded-lg p-3 hover:bg-sidebar-accent transition-colors"
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage
+                              src={activity.avatar || "/placeholder.svg"}
+                              alt={activity.user}
                             />
-                            <span className="text-sm text-sidebar-foreground/70">
-                              {activity.time}
-                            </span>
+                            <AvatarFallback>
+                              {activity.user
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center space-x-1">
+                              <activity.icon
+                                className={`h-4 w-4 ${activity.color}`}
+                              />
+                              <span className="text-sm text-sidebar-foreground/70">
+                                {activity.time}
+                              </span>
+                            </div>
+
+                            <p className="text-sm leading-relaxed">
+                              <span className="font-medium">
+                                {activity.user}
+                              </span>{" "}
+                              <span className="text-sidebar-foreground/80">
+                                {activity.action}
+                              </span>{" "}
+                              <span className="font-semibold text-sidebar-foreground">
+                                {activity.subject}
+                              </span>
+                            </p>
                           </div>
-
-                          <p className="text-sm leading-relaxed">
-                            <span className="font-medium">{activity.user}</span>{" "}
-                            <span className="text-sidebar-foreground/80">
-                              {activity.action}
-                            </span>{" "}
-                            <span className="font-semibold text-sidebar-foreground">
-                              {activity.subject}
-                            </span>
-                          </p>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
 
-          <SidebarFooter>
-            <div className="p-2">
-              <Button
-                className="w-full justify-start gap-2"
-                variant="outline"
-                size="sm"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Abrir Chat
-              </Button>
-            </div>
-          </SidebarFooter>
-        </div>
-      </div>
-    ); // Só renderiza se estiver aberto
+            <SidebarFooter>
+              <div className="p-2">
+                <Button
+                  className="w-full justify-start gap-2"
+                  variant="outline"
+                  size="sm"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Abrir Chat
+                </Button>
+              </div>
+            </SidebarFooter>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: mantém o comportamento fixo/empurrando
   return (
     <div
       className={cn(
