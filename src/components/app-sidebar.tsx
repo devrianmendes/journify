@@ -22,7 +22,7 @@ import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
 import { createClient } from "@/lib/supabase/client";
-import { UserProfile } from "@/types/loginType";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 // This is sample data.
 
