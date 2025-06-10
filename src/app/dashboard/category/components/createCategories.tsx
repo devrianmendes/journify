@@ -44,7 +44,8 @@ export default function CreateCategories() {
 
   const { mutate, isPending } = trpc.category.createCategory.useMutation({
     onSuccess: (data) => {
-      utils.category.invalidate();
+      utils.category.getCreatedCategories.invalidate();
+      utils.category.getOwnCreatedGategories.invalidate();
     },
     onError: (error) => {
       setGenericError(error.message);
@@ -138,7 +139,7 @@ export default function CreateCategories() {
                 )}
               />
               {genericError && (
-                <span className="text-red-600 text-center">{genericError}</span>
+                <span className="text-red-600 block my-2">{genericError}</span>
               )}
               <Button disabled={isPending} className="min-w-[130px]">
                 {isPending ? (

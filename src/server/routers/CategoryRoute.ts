@@ -1,12 +1,10 @@
 import {
-  CategorySchema,
   CreateCategorySchema,
   DeleteCategorySchema,
   OwnCategorySchema,
 } from "@/validators/categoryValidator";
 import { publicProcedure, router } from "../trpc";
 import { categories } from "@/db/schema";
-import { get } from "http";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db/index";
 import { eq } from "drizzle-orm";
@@ -35,34 +33,37 @@ export const CategoryRouter = router({
     }),
   createCategory: publicProcedure
     .input(CreateCategorySchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       try {
-        const { data, error } = await ctx.supabase
-          .from("categories")
-          .insert(input);
+        const createdCategory = await db
+          .insert(categories)
+          .values({
+            name: input.name,
+            slug: input.slug,
+            color: input.color,
+            creator_id: input.creator_id,
+            is_public: input.is_public,
+          })
+          .returning({
+            name: categories.name,
+          });
 
-          console.log(data, 'data')
-          console.log(error, 'error')
-
-        if (error && error.details.includes("already exists")) {
+        if (createdCategory.length <= 0) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Categoria já existe.",
+            message: "Erro ao criar categoria.",
           });
         }
 
-        const createdCategory = await db.insert(categories).values({
-          name: input.name,
-          slug: input.slug,
-          color: input.color,
-          creator_id: input.creator_id,
-          is_public: input.is_public,
-        });
-
-        console.log(createdCategory, "criando já existente");
-
-        return { data, error: null };
-      } catch (error: unknown) {
+        return { data: createdCategory, error: null };
+      } catch (error: any) {
+        // console.log(error);
+        if (error?.cause?.code === "23505" || error?.code === "23505") {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Já existe uma categoria com esse nome.",
+          });
+        }
         if (error instanceof TRPCError) {
           throw error;
         }
@@ -82,13 +83,6 @@ export const CategoryRouter = router({
           .from(categories)
           .where(eq(categories.creator_id, input.user_id));
 
-        if (!ownCategories || ownCategories.length <= 0) {
-          return {
-            data: ownCategories,
-            error: null,
-          };
-        }
-
         return {
           data: ownCategories,
           error: null,
@@ -102,7 +96,7 @@ export const CategoryRouter = router({
     }),
   deleteCategory: publicProcedure
     .input(DeleteCategorySchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       try {
         const selectecCategory = await db.query.categories.findFirst({
           where: eq(categories.id, input.category_id),
