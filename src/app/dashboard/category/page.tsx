@@ -9,6 +9,7 @@ import {
 import CommunityCategories from "./components/communityCategories/communityCategories";
 import CreateCategories from "./components/createCategories";
 import DeleteCategory from "./components/deleteCategories";
+import Link from "next/link";
 
 export default async function Page() {
   return (
@@ -17,7 +18,7 @@ export default async function Page() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+              <Link href="/dashboard">Dashboard</Link>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>

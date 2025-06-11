@@ -18,7 +18,7 @@ import Link from "next/link";
 
 export default async function Home() {
   return (
-    <div className="w-screen">
+    <div className="w-screen font-urbanist">
       <main>
         <Header />
         <section className="h-screen flex justify-center items-center text-center">
@@ -26,7 +26,7 @@ export default async function Home() {
             <p className="text-4xl font-bold">
               Acompanhe. Conecte. Suba de nível.
             </p>
-            <p className="text-4xl font-bold text-stone-500">
+            <p className="text-4xl font-bold text-stone-500 ">
               Para estudantes e desenvolvedores. Progresso visível.
             </p>
           </div>

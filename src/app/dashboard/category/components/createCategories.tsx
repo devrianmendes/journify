@@ -109,10 +109,11 @@ export default function CreateCategories() {
                   <FormItem>
                     <FormLabel>Cor da badge</FormLabel>
                     <FormControl>
-                      <div className="flex w-full items-center gap-5">
+                      <div className="flex flex-col md:flex-row gap-5">
                         <GradientPicker
                           background={field.value}
                           setBackground={field.onChange}
+                          className="min-w-8"
                           {...field}
                         />
                         <div className="flex gap-3">

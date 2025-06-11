@@ -22,7 +22,6 @@ import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
 import { createClient } from "@/lib/supabase/client";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 // This is sample data.
 
@@ -37,23 +36,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       email: email,
       avatar: avatar_url,
     },
-    teams: [
-      {
-        name: "Acme Inc",
-        logo: GalleryVerticalEnd,
-        plan: "Enterprise",
-      },
-      {
-        name: "Acme Corp.",
-        logo: AudioWaveform,
-        plan: "Startup",
-      },
-      {
-        name: "Evil Corp.",
-        logo: Command,
-        plan: "Free",
-      },
-    ],
+    
     navMain: [
       {
         title: "Início",
@@ -65,62 +48,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Estudos",
         url: "/dashboard/study",
         icon: Book,
-        items: [
-          {
-            title: "Em andamento",
-            url: "#",
-          },
-          {
-            title: "Próximos estudos",
-            url: "#",
-          },
-          {
-            title: "Revisar",
-            url: "#",
-          },
-          {
-            title: "Masterizado",
-            url: "#",
-          },
-        ],
+        // items: [
+        //   {
+        //     title: "Em andamento",
+        //     url: "#",
+        //   },
+        //   {
+        //     title: "Próximos estudos",
+        //     url: "#",
+        //   },
+        //   {
+        //     title: "Revisar",
+        //     url: "#",
+        //   },
+        //   {
+        //     title: "Masterizado",
+        //     url: "#",
+        //   },
+        // ],
       },
       {
         title: "Categorias",
         url: "/dashboard/category",
         icon: Bookmark,
-        items: [
-          {
-            title: "Comunidade (recomendado)",
-            url: "/dashboard/category",
-          },
-          {
-            title: "Adicionar",
-            url: "/dashboard/category",
-          },
-          {
-            title: "Remover",
-            url: "/dashboard/category",
-          },
-        ],
       },
       {
         title: "Tags",
-        url: "#",
+        url: "/dashboard/category",
         icon: Tag,
-        items: [
-          {
-            title: "Comunidade (recomendado)",
-            url: "#",
-          },
-          {
-            title: "Adicionar",
-            url: "#",
-          },
-          {
-            title: "Remover",
-            url: "#",
-          },
-        ],
       },
     ],
     // projects: [
@@ -160,7 +115,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={dataMenu.teams} />
+        {/* <TeamSwitcher teams={dataMenu.teams} /> */}
+        <p>INSERIR HEADER AQUI</p>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={dataMenu.navMain} />

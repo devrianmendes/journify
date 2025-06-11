@@ -97,6 +97,7 @@ const activities = [
 export function ActivitySidebar(props: React.ComponentProps<"div">) {
   const { openSecondary, setOpenSecondary, isMobile } = useSidebar();
 
+
   if (isMobile) {
     return (
       <Sheet open={openSecondary} onOpenChange={setOpenSecondary}>
@@ -104,12 +105,7 @@ export function ActivitySidebar(props: React.ComponentProps<"div">) {
           data-sidebar="activity-sidebar"
           data-slot="activity-sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-[var(--sidebar-width)] p-0"
-          style={
-            {
-              "--sidebar-width": "18rem",
-            } as React.CSSProperties
-          }
+          className="bg-sidebar text-sidebar-foreground p-0 w-[18rem]"
           side="right"
         >
           <SheetHeader className="sr-only">
@@ -195,171 +191,53 @@ export function ActivitySidebar(props: React.ComponentProps<"div">) {
       </Sheet>
     );
   }
-  //w-[var(--sidebar-width-icon)]
-  // Desktop: mantém o comportamento fixo/empurrando
   return (
-    <div>
-      {!openSecondary ? (
-        <div
-          className={cn(
-            "fixed right-0 inset-y-0 z-30 h-svh w-[var(--sidebar-width-icon)] bg-sidebar text-sidebar-foreground flex flex-col border-l transition-[right,width] duration-200 ease-linear md:flex",
+    <div
+      className={cn(
+        "fixed inset-y-0 z-30 right-0 h-svh bg-sidebar text-sidebar-foreground flex flex-col border-l transition-[right,width] duration-200 ease-linear md:flex",
+        openSecondary
+          ? "w-[var(--sidebar-width)]"
+          : "w-[var(--sidebar-width-icon)]",
 
-            props.className
-          )}
-          {...props}
-        >
-          <SidebarHeader className="p-0">
-            <SidebarGroup className="p-0">
-              <SidebarGroupLabel className="text-lg font-semibold p-1">
-                Feed
-              </SidebarGroupLabel>
-            </SidebarGroup>
-          </SidebarHeader>
-          <SidebarContent className="overflow-hidden py-5">
-            <SidebarGroup className="p-0">
-              <SidebarGroupContent>
-                <ScrollArea className="h-full">
-                  <div className="space-y-4">
-                    {activities.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="flex items-center justify-center space-x-3 rounded-lg hover:bg-sidebar-accent transition-colors"
-                      >
-                        <Avatar className="h-8 w-8 flex items-center justify-center">
-                          <AvatarImage
-                            src={activity.avatar || "/placeholder.svg"}
-                            alt={activity.user}
-                          />
-                          <AvatarFallback>
-                            {activity.user
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter>
-            <div className="">
-              <Button className="p-0! w-full!" variant="outline" size="sm">
-                <MessageCircle width={30} height={30} className="p-0 m-0" />
-              </Button>
-            </div>
-          </SidebarFooter>
-        </div>
-      ) : (
-        <div
-          className={cn(
-            "fixed inset-y-0 z-30 h-svh w-[var(--sidebar-width)] bg-sidebar text-sidebar-foreground flex flex-col border-l transition-[right,width] duration-200 ease-linear md:flex",
-            openSecondary
-              ? "right-0"
-              : isMobile
-              ? "right-[-255px]"
-              : "right-[-205px]",
-
-            props.className
-          )}
-          {...props}
-        >
-          <SidebarHeader>
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-lg font-semibold">
-                Feed de Atividades
-              </SidebarGroupLabel>
-            </SidebarGroup>
-          </SidebarHeader>
-
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <ScrollArea className="h-full">
-                  <div className="space-y-4 p-2">
-                    {activities.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="flex items-start space-x-3 rounded-lg p-3 hover:bg-sidebar-accent transition-colors"
-                      >
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={activity.avatar || "/placeholder.svg"}
-                            alt={activity.user}
-                          />
-                          <AvatarFallback>
-                            {activity.user
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center space-x-1">
-                            <activity.icon
-                              className={`h-4 w-4 ${activity.color}`}
-                            />
-                            <span className="text-sm text-sidebar-foreground/70">
-                              {activity.time}
-                            </span>
-                          </div>
-
-                          <p className="text-sm leading-relaxed">
-                            <span className="font-medium">{activity.user}</span>{" "}
-                            <span className="text-sidebar-foreground/80">
-                              {activity.action}
-                            </span>{" "}
-                            <span className="font-semibold text-sidebar-foreground">
-                              {activity.subject}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter>
-            <div className="p-2">
-              <Button
-                className="w-full justify-start gap-2"
-                variant="outline"
-                size="sm"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Abrir Chat
-              </Button>
-            </div>
-          </SidebarFooter>
-        </div>
+        props.className
       )}
-
-      {/* <SidebarHeader>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-lg font-semibold">
-            Feed de Atividades
+      {...props}
+    >
+      <SidebarHeader className={!openSecondary ? "p-0 m-0" : ""}>
+        <SidebarGroup className={!openSecondary ? "p-0 m-0" : ""}>
+          <SidebarGroupLabel
+            className={`text-lg font-semibold ${
+              !openSecondary ? "p-1" : "p-2"
+            }`}
+          >
+            {!openSecondary ? "Feed" : "Feed de Atividades"}
           </SidebarGroupLabel>
         </SidebarGroup>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
+      <SidebarContent className={!openSecondary ? "overflow-hidden py-5" : ""}>
+        <SidebarGroup className={!openSecondary ? "p-0" : ""}>
           <SidebarGroupContent>
             <ScrollArea className="h-full">
-              <div className="space-y-4 p-2">
+              {/* <div className="space-y-4 p-2"> */}
+              <div className={`space-y-4 ${!openSecondary ? "p-0" : "p-2"}`}>
                 {activities.map((activity) => (
+                  // <div
+                  //   key={activity.id}
+                  //   className="flex items-start space-x-3 rounded-lg p-3 hover:bg-sidebar-accent transition-colors"
+                  // >
                   <div
                     key={activity.id}
-                    className="flex items-start space-x-3 rounded-lg p-3 hover:bg-sidebar-accent transition-colors"
+                    className={
+                      !openSecondary ? "items-center justify-center" : ""
+                    }
                   >
-                    <Avatar className="h-8 w-8">
+                    {/* <Avatar className="h-8 w-8"> */}
+                    <Avatar
+                      className={
+                        !openSecondary ? "flex items-center justify-center" : ""
+                      }
+                    >
                       <AvatarImage
                         src={activity.avatar || "/placeholder.svg"}
                         alt={activity.user}
@@ -372,26 +250,28 @@ export function ActivitySidebar(props: React.ComponentProps<"div">) {
                       </AvatarFallback>
                     </Avatar>
 
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center space-x-1">
-                        <activity.icon
-                          className={`h-4 w-4 ${activity.color}`}
-                        />
-                        <span className="text-sm text-sidebar-foreground/70">
-                          {activity.time}
-                        </span>
-                      </div>
+                    {openSecondary && (
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center space-x-1">
+                          <activity.icon
+                            className={`h-4 w-4 ${activity.color}`}
+                          />
+                          <span className="text-sm text-sidebar-foreground/70">
+                            {activity.time}
+                          </span>
+                        </div>
 
-                      <p className="text-sm leading-relaxed">
-                        <span className="font-medium">{activity.user}</span>{" "}
-                        <span className="text-sidebar-foreground/80">
-                          {activity.action}
-                        </span>{" "}
-                        <span className="font-semibold text-sidebar-foreground">
-                          {activity.subject}
-                        </span>
-                      </p>
-                    </div>
+                        <p className="text-sm leading-relaxed">
+                          <span className="font-medium">{activity.user}</span>{" "}
+                          <span className="text-sidebar-foreground/80">
+                            {activity.action}
+                          </span>{" "}
+                          <span className="font-semibold text-sidebar-foreground">
+                            {activity.subject}
+                          </span>
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -401,17 +281,17 @@ export function ActivitySidebar(props: React.ComponentProps<"div">) {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="p-2">
+        <div className={!openSecondary ? "p-0" : "p-2"}>
           <Button
-            className="w-full justify-start gap-2"
+            className="w-full justify-center gap-2 p-0! transition-all duration-200"
             variant="outline"
             size="sm"
           >
-            <MessageCircle className="h-4 w-4" />
-            Abrir Chat
+            <MessageCircle  />
+            {openSecondary && "Abrir Chat"}
           </Button>
         </div>
-      </SidebarFooter> */}
+      </SidebarFooter>
     </div>
   );
 }

@@ -13,17 +13,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function ModeToggle() {
-  const { setTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
   const [changeTheme, setChangeTheme] = React.useState(false);
 
   const onChangeTheme = () => {
-    setChangeTheme(!changeTheme);
-
-    if (changeTheme === true) {
-      setTheme("light");
-    } else {
-      setTheme("dark");
-    }
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
