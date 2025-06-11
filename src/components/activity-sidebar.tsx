@@ -107,7 +107,7 @@ export function ActivitySidebar(props: React.ComponentProps<"div">) {
           className="bg-sidebar text-sidebar-foreground w-[var(--sidebar-width)] p-0"
           style={
             {
-              "--sidebar-width": "18rem", // ou SIDEBAR_WIDTH_MOBILE
+              "--sidebar-width": "18rem",
             } as React.CSSProperties
           }
           side="right"
@@ -195,24 +195,153 @@ export function ActivitySidebar(props: React.ComponentProps<"div">) {
       </Sheet>
     );
   }
-
+  //w-[var(--sidebar-width-icon)]
   // Desktop: mantém o comportamento fixo/empurrando
   return (
-    <div
-      className={cn(
-        "fixed inset-y-0 z-30 h-svh w-[var(--sidebar-width)] bg-sidebar text-sidebar-foreground flex flex-col border-l transition-[right,width] duration-200 ease-linear md:flex",
-        // openSecondary ? "right-0" : "right-[-205px]",
-        openSecondary
-          ? "right-0"
-          : isMobile
-          ? "right-[-255px]"
-          : "right-[-205px]",
+    <div>
+      {!openSecondary ? (
+        <div
+          className={cn(
+            "fixed right-0 inset-y-0 z-30 h-svh w-[var(--sidebar-width-icon)] bg-sidebar text-sidebar-foreground flex flex-col border-l transition-[right,width] duration-200 ease-linear md:flex",
 
-        props.className
+            props.className
+          )}
+          {...props}
+        >
+          <SidebarHeader className="p-0">
+            <SidebarGroup className="p-0">
+              <SidebarGroupLabel className="text-lg font-semibold p-1">
+                Feed
+              </SidebarGroupLabel>
+            </SidebarGroup>
+          </SidebarHeader>
+          <SidebarContent className="overflow-hidden py-5">
+            <SidebarGroup className="p-0">
+              <SidebarGroupContent>
+                <ScrollArea className="h-full">
+                  <div className="space-y-4">
+                    {activities.map((activity) => (
+                      <div
+                        key={activity.id}
+                        className="flex items-center justify-center space-x-3 rounded-lg hover:bg-sidebar-accent transition-colors"
+                      >
+                        <Avatar className="h-8 w-8 flex items-center justify-center">
+                          <AvatarImage
+                            src={activity.avatar || "/placeholder.svg"}
+                            alt={activity.user}
+                          />
+                          <AvatarFallback>
+                            {activity.user
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+
+          <SidebarFooter>
+            <div className="">
+              <Button className="p-0! w-full!" variant="outline" size="sm">
+                <MessageCircle width={30} height={30} className="p-0 m-0" />
+              </Button>
+            </div>
+          </SidebarFooter>
+        </div>
+      ) : (
+        <div
+          className={cn(
+            "fixed inset-y-0 z-30 h-svh w-[var(--sidebar-width)] bg-sidebar text-sidebar-foreground flex flex-col border-l transition-[right,width] duration-200 ease-linear md:flex",
+            openSecondary
+              ? "right-0"
+              : isMobile
+              ? "right-[-255px]"
+              : "right-[-205px]",
+
+            props.className
+          )}
+          {...props}
+        >
+          <SidebarHeader>
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-lg font-semibold">
+                Feed de Atividades
+              </SidebarGroupLabel>
+            </SidebarGroup>
+          </SidebarHeader>
+
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <ScrollArea className="h-full">
+                  <div className="space-y-4 p-2">
+                    {activities.map((activity) => (
+                      <div
+                        key={activity.id}
+                        className="flex items-start space-x-3 rounded-lg p-3 hover:bg-sidebar-accent transition-colors"
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={activity.avatar || "/placeholder.svg"}
+                            alt={activity.user}
+                          />
+                          <AvatarFallback>
+                            {activity.user
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center space-x-1">
+                            <activity.icon
+                              className={`h-4 w-4 ${activity.color}`}
+                            />
+                            <span className="text-sm text-sidebar-foreground/70">
+                              {activity.time}
+                            </span>
+                          </div>
+
+                          <p className="text-sm leading-relaxed">
+                            <span className="font-medium">{activity.user}</span>{" "}
+                            <span className="text-sidebar-foreground/80">
+                              {activity.action}
+                            </span>{" "}
+                            <span className="font-semibold text-sidebar-foreground">
+                              {activity.subject}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+
+          <SidebarFooter>
+            <div className="p-2">
+              <Button
+                className="w-full justify-start gap-2"
+                variant="outline"
+                size="sm"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Abrir Chat
+              </Button>
+            </div>
+          </SidebarFooter>
+        </div>
       )}
-      {...props}
-    >
-      <SidebarHeader>
+
+      {/* <SidebarHeader>
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-semibold">
             Feed de Atividades
@@ -282,7 +411,7 @@ export function ActivitySidebar(props: React.ComponentProps<"div">) {
             Abrir Chat
           </Button>
         </div>
-      </SidebarFooter>
+      </SidebarFooter> */}
     </div>
   );
 }
