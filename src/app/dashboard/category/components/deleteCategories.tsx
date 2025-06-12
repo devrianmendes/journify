@@ -134,10 +134,10 @@ export default function DeleteCategory() {
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      <p className="block">
+                      <span className="block">
                         Apenas categorias criadas por você poderão ser
                         deletadas.
-                      </p>
+                      </span>
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

@@ -25,16 +25,39 @@ const badgeVariants = cva(
   }
 );
 
-function isColorDark(hex: string): boolean {
-  const cleanedHex = hex.replace("#", "");
+function getContrastTextColor(background: string): string {
+  // Função auxiliar para calcular luminância de um hex
+  function luminance(hex: string) {
+    hex = hex.replace("#", "");
+    if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
 
-  const r = parseInt(cleanedHex.substring(0, 2), 16);
-  const g = parseInt(cleanedHex.substring(2, 4), 16);
-  const b = parseInt(cleanedHex.substring(4, 6), 16);
+  // Se for gradiente, extrai todas as cores
+  if (background.startsWith("linear-gradient")) {
+    const colorMatches = background.match(/#([0-9a-fA-F]{3,6})/g);
+    if (colorMatches && colorMatches.length > 0) {
+      // Calcula a luminância média das cores do gradiente
+      const avgLuminance =
+        colorMatches
+          .map((hex) => luminance(hex))
+          .reduce((a, b) => a + b, 0) / colorMatches.length;
+      return avgLuminance < 140 ? "#fff" : "#000";
+    }
+    // fallback se não encontrar cor
+    return "#000";
+  }
 
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  // Se for cor sólida
+  if (background.startsWith("#")) {
+    return luminance(background) < 140 ? "#fff" : "#000";
+  }
 
-  return luminance < 140;
+  // fallback para outros formatos
+  return "#000";
 }
 
 function Badge({
@@ -51,11 +74,13 @@ function Badge({
   const Comp = asChild ? Slot : "span";
 
   const backgroundColor = style?.backgroundColor as string | undefined;
+  const backgroundImage = style?.backgroundImage as string | undefined;
   let textColor = undefined;
 
   if (backgroundColor && /^#([0-9A-F]{3}){1,2}$/i.test(backgroundColor)) {
-    const isDark = isColorDark(backgroundColor);
-    textColor = isDark ? "#fff" : "#000";
+    textColor = getContrastTextColor(backgroundColor);
+  } else if (backgroundImage && backgroundImage.startsWith("linear-gradient")) {
+    textColor = getContrastTextColor(backgroundImage);
   }
 
   return (

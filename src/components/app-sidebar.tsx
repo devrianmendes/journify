@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/sidebar";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-import { TeamSwitcher } from "./team-switcher";
 import { createClient } from "@/lib/supabase/client";
 
 // This is sample data.
