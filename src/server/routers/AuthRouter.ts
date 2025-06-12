@@ -111,7 +111,7 @@ export const AuthRouter = router({
         if (!data.user) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Erro ao criar conta. Tente novamente.",
+            message: "Erro ao acessar conta. Tente novamente.",
           });
         }
 

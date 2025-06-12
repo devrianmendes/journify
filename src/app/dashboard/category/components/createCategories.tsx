@@ -22,11 +22,24 @@ import {
 import { GradientPicker } from "@/components/gradient-picker";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CategorySchema } from "@/validators/categoryValidator";
+import {
+  CategorySchema,
+  StoredCategoryType,
+} from "@/validators/categoryValidator";
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoaderPinwheel } from "lucide-react";
 import { trpc } from "@/lib/trpc/trpcClient";
+import { SelectContent, SelectItem } from "@radix-ui/react-select";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandSeparator,
+} from "cmdk";
 
 type NewCategoryType = z.infer<typeof CategorySchema>;
 
@@ -45,7 +58,7 @@ export default function CreateCategories() {
   const { mutate, isPending } = trpc.category.createCategory.useMutation({
     onSuccess: (data) => {
       utils.category.getCreatedCategories.invalidate();
-      utils.category.getOwnCreatedGategories.invalidate();
+      utils.category.getOwnCreatedCategories.invalidate();
     },
     onError: (error) => {
       setGenericError(error.message);
@@ -53,6 +66,16 @@ export default function CreateCategories() {
   });
 
   const exampleBadge = form.watch("name"); //Reatividade na badge de exemplo
+
+  const teste = form.watch("name");
+  const { data } = trpc.category.getFilteredCategories.useQuery({
+    name: teste,
+  });
+  let teste1: StoredCategoryType[] | null = null;
+
+  if (data && data.data) teste1 = data.data;
+
+  console.log(teste1 && teste1, "teste1");
 
   const onSubmit = async (newCategoryData: NewCategoryType) => {
     try {
@@ -96,12 +119,46 @@ export default function CreateCategories() {
                   <FormItem>
                     <FormLabel>Nome</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <div className="relative">
+                        <Input {...field} placeholder="Buscar categoria..."/>
+                        {teste1 && (
+                          <Command className="absolute z-10 w-full bg-background border rounded-md mt-1">
+                            <CommandInput
+                              placeholder="Buscar categoria..."
+                              value={field.value}
+                            />
+                            <CommandList>
+                              {teste1.length === 0 && (
+                                <CommandEmpty>
+                                  Nenhuma categoria encontrada.
+                                </CommandEmpty>
+                              )}
+                              {teste1.map((cat) => (
+                                <CommandItem
+                                  key={cat.id}
+                                  value={cat.name}
+                                  onSelect={() =>
+                                    form.setValue("name", cat.name)
+                                  }
+                                >
+                                  {cat.name}
+                                </CommandItem>
+                              ))}
+                            </CommandList>
+                          </Command>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <div
+                className={`flex flex-col bg-background w-40 h-auto ${
+                  teste1 ? "block" : "hidden"
+                }`}
+              ></div>
               <FormField
                 control={form.control}
                 name="color"

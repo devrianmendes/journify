@@ -105,7 +105,7 @@ export default function DeleteCategory() {
                 name="category_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Suas categorias</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}

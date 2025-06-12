@@ -7,7 +7,9 @@ import {
   Command,
   GalleryVerticalEnd,
   LayoutDashboard,
+  Lock,
   Tag,
+  UserPen,
 } from "lucide-react";
 import * as React from "react";
 
@@ -72,10 +74,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Bookmark,
       },
       {
-        title: "Tags",
-        url: "/dashboard/category",
-        icon: Tag,
+        title: "Perfil",
+        url: "/profile",
+        icon: UserPen,
       },
+      {
+        title: "Conta",
+        url: "/account",
+        icon: Lock,
+      },
+
     ],
     // projects: [
     //   {

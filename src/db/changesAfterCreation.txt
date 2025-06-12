@@ -1,0 +1,13 @@
+CREATE TABLE tags (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL UNIQUE,
+  slug text NOT NULL UNIQUE,
+  color text,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE skill_tags (
+  skill_id uuid REFERENCES skills(id) ON DELETE CASCADE,
+  tag_id uuid REFERENCES tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (skill_id, tag_id)
+);

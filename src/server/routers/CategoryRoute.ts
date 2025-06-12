@@ -1,17 +1,18 @@
 import {
   CreateCategorySchema,
   DeleteCategorySchema,
+  FilteredCategorySchema,
   OwnCategorySchema,
 } from "@/validators/categoryValidator";
 import { publicProcedure, router } from "../trpc";
 import { categories } from "@/db/schema";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db/index";
-import { eq } from "drizzle-orm";
+import { arrayOverlaps, eq, ilike } from "drizzle-orm";
 
 export const CategoryRouter = router({
   getCreatedCategories: publicProcedure
-    // .input(CategorySchema)
+    // .input(CreateCategorySchema)
     .query(async ({ ctx }) => {
       try {
         const { data, error } = await ctx.supabase.from("categories").select();
@@ -74,7 +75,7 @@ export const CategoryRouter = router({
         });
       }
     }),
-  getOwnCreatedGategories: publicProcedure
+  getOwnCreatedCategories: publicProcedure
     .input(OwnCategorySchema)
     .query(async ({ input }) => {
       try {
@@ -93,6 +94,28 @@ export const CategoryRouter = router({
           message: "Erro ao buscar categorias.",
         });
       }
+    }),
+  getFilteredCategories: publicProcedure
+    .input(FilteredCategorySchema)
+    .query(async ({ input }) => {
+      try {
+        const filter = input.name ? `%${input.name}%` : "";
+        const categoryFiltered = await db
+          .select()
+          .from(categories)
+          .where(ilike(categories.name, filter));
+
+        return {
+          data: categoryFiltered,
+          error: null,
+        };
+      } catch (error: unknown) {
+        return {
+          data: null,
+          error: error,
+        };
+      }
+      // console.log(input.name, 'oaisjdoaijsdijadoijdoiajsdiojasoijdoiasjdiojaoidjoaisjdoiajsiodjaoisdj');
     }),
   deleteCategory: publicProcedure
     .input(DeleteCategorySchema)
