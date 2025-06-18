@@ -28,7 +28,15 @@ import {
 } from "@/validators/categoryValidator";
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { LoaderPinwheel } from "lucide-react";
+import {
+  Calculator,
+  Calendar,
+  CreditCard,
+  LoaderPinwheel,
+  Settings,
+  Smile,
+  User,
+} from "lucide-react";
 import { trpc } from "@/lib/trpc/trpcClient";
 import { SelectContent, SelectItem } from "@radix-ui/react-select";
 import {
@@ -40,6 +48,7 @@ import {
   CommandItem,
   CommandSeparator,
 } from "cmdk";
+import { CommandShortcut } from "@/components/ui/command";
 
 type NewCategoryType = z.infer<typeof CategorySchema>;
 
@@ -119,7 +128,7 @@ export default function CreateCategories() {
                   <FormItem>
                     <FormLabel>Nome</FormLabel>
                     <FormControl>
-                      <div className="relative">
+                      {/* <div className="relative">
                         <Input {...field} placeholder="Buscar categoria..."/>
                         {teste1 && (
                           <Command className="absolute z-10 w-full bg-background border rounded-md mt-1">
@@ -147,7 +156,52 @@ export default function CreateCategories() {
                             </CommandList>
                           </Command>
                         )}
-                      </div>
+                      </div> */}
+                      <Command className="rounded-lg border shadow-md md:min-w-[450px]">
+                        <CommandInput placeholder="Nome da categoria" />
+                        <CommandList>
+                          {!teste1 || teste1.length === 0 ? (
+                            <CommandEmpty>
+                              Nenhuma categoria encontrada.
+                            </CommandEmpty>
+                          ) : (
+                            <>
+                              <CommandGroup heading="Suggestions">
+                                <CommandItem>
+                                  <Calendar />
+                                  <span>Calendar</span>
+                                </CommandItem>
+                                <CommandItem>
+                                  <Smile />
+                                  <span>Search Emoji</span>
+                                </CommandItem>
+                                <CommandItem disabled>
+                                  <Calculator />
+                                  <span>Calculator</span>
+                                </CommandItem>
+                              </CommandGroup>
+                              <CommandSeparator />
+                              <CommandGroup heading="Settings">
+                                <CommandItem>
+                                  <User />
+                                  <span>Profile</span>
+                                  <CommandShortcut>⌘P</CommandShortcut>
+                                </CommandItem>
+                                <CommandItem>
+                                  <CreditCard />
+                                  <span>Billing</span>
+                                  <CommandShortcut>⌘B</CommandShortcut>
+                                </CommandItem>
+                                <CommandItem>
+                                  <Settings />
+                                  <span>Settings</span>
+                                  <CommandShortcut>⌘S</CommandShortcut>
+                                </CommandItem>
+                              </CommandGroup>
+                            </>
+                          )}
+                        </CommandList>
+                      </Command>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

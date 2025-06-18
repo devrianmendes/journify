@@ -9,9 +9,12 @@ import { categories } from "@/db/schema";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db/index";
 import { arrayOverlaps, eq, ilike } from "drizzle-orm";
+import { isAuthed } from "../proceduresMiddleware";
+
+const protectedProcedure = publicProcedure.use(isAuthed)
 
 export const CategoryRouter = router({
-  getCreatedCategories: publicProcedure
+  getCreatedCategories: protectedProcedure
     // .input(CreateCategorySchema)
     .query(async ({ ctx }) => {
       try {
@@ -32,7 +35,7 @@ export const CategoryRouter = router({
         });
       }
     }),
-  createCategory: publicProcedure
+  createCategory: protectedProcedure
     .input(CreateCategorySchema)
     .mutation(async ({ input }) => {
       try {
@@ -75,7 +78,7 @@ export const CategoryRouter = router({
         });
       }
     }),
-  getOwnCreatedCategories: publicProcedure
+  getOwnCreatedCategories: protectedProcedure
     .input(OwnCategorySchema)
     .query(async ({ input }) => {
       try {
@@ -95,7 +98,7 @@ export const CategoryRouter = router({
         });
       }
     }),
-  getFilteredCategories: publicProcedure
+  getFilteredCategories: protectedProcedure
     .input(FilteredCategorySchema)
     .query(async ({ input }) => {
       try {
@@ -117,7 +120,7 @@ export const CategoryRouter = router({
       }
       // console.log(input.name, 'oaisjdoaijsdijadoijdoiajsdiojasoijdoiasjdiojaoidjoaisjdoiajsiodjaoisdj');
     }),
-  deleteCategory: publicProcedure
+  deleteCategory: protectedProcedure
     .input(DeleteCategorySchema)
     .mutation(async ({ input }) => {
       try {
