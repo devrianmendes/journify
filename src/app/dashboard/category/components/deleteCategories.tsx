@@ -24,9 +24,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import forceLogout from "@/hooks/use-logout";
+import { activeSession } from "@/hooks/use-session";
 import { createClient } from "@/lib/supabase/client";
 import { trpc } from "@/lib/trpc/trpcClient";
-import { UserProfile } from "@/types/loginType";
+import { SessionType, UserProfile } from "@/types/loginType";
 import {
   DeleteCategorySchema,
   DeleteCategoryType,
@@ -56,11 +58,8 @@ export default function DeleteCategory() {
   }
   const userData: UserProfile = JSON.parse(storedData);
 
-  useEffect(() => {
-    form.setValue("user_id", userData.user_id);
-  }, []);
 
-  const { data } = trpc.category.getOwnCreatedGategories.useQuery({
+  const { data } = trpc.category.getOwnCreatedCategories.useQuery({
     user_id: userData.user_id,
   });
 
@@ -68,7 +67,7 @@ export default function DeleteCategory() {
     trpc.category.deleteCategory.useMutation({
       onSuccess: (data) => {
         toast.success(`Categoria deletada.`);
-        utils.category.getOwnCreatedGategories.invalidate();
+        utils.category.getOwnCreatedCategories.invalidate();
         utils.category.getCreatedCategories.invalidate();
       },
       onError: (error) => {
@@ -78,11 +77,19 @@ export default function DeleteCategory() {
 
   const onSubmit = async (deleteCategoryData: DeleteCategoryType) => {
     try {
+      const userData = await activeSession();
+      if (!userData) {
+        forceLogout();
+      } else {
+        form.setValue("user_id", userData.session.user.id);
+
+        mutate({
+          user_id: deleteCategoryData.user_id,
+          category_id: deleteCategoryData.category_id,
+        });
+      }
+
     } catch (error: unknown) {}
-    mutate({
-      user_id: deleteCategoryData.user_id,
-      category_id: deleteCategoryData.category_id,
-    });
   };
 
   return (
