@@ -27,8 +27,8 @@ export const FilteredCategorySchema = z.object({
 });
 
 export const DeleteCategorySchema = z.object({
-  user_id: z.string().min(1),
-  category_id: z.string().min(1),
+  user_id: z.string().min(1, 'Erro ao encontrar usuário.'),
+  category_id: z.string().min(1, 'Selecione uma categoria.'),
 });
 
 export type CategoryType = z.infer<typeof CategorySchema>;

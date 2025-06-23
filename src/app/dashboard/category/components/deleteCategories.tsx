@@ -26,14 +26,13 @@ import {
 } from "@/components/ui/select";
 import forceLogout from "@/hooks/use-logout";
 import { activeSession } from "@/hooks/use-session";
-import { createClient } from "@/lib/supabase/client";
 import { trpc } from "@/lib/trpc/trpcClient";
-import { SessionType, UserProfile } from "@/types/loginType";
 import {
   DeleteCategorySchema,
   DeleteCategoryType,
 } from "@/validators/categoryValidator";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Session } from "@supabase/supabase-js";
 import { LoaderPinwheel } from "lucide-react";
 
 import { useEffect, useState } from "react";
@@ -42,6 +41,8 @@ import { toast } from "sonner";
 
 export default function DeleteCategory() {
   const [genericError, setGenericError] = useState<string | null>(null); //Erro vindo do banco
+  const [session, setSession] = useState<Session | null>(null);
+
   const form = useForm({
     resolver: zodResolver(DeleteCategorySchema),
     defaultValues: {
@@ -50,22 +51,42 @@ export default function DeleteCategory() {
     },
   });
   const utils = trpc.useUtils();
-  const storedData = localStorage.getItem("userData");
-  if (!storedData) {
-    const supabase = createClient();
-    supabase.auth.signOut();
-    return;
-  }
-  const userData: UserProfile = JSON.parse(storedData);
 
+  //Verificando se o usuário possui sessão ativa. Se tiver, salva o id
+  useEffect(() => {
+    const getSession = async () => {
+      try {
+        const userSession = await activeSession();
 
-  const { data } = trpc.category.getOwnCreatedCategories.useQuery({
-    user_id: userData.user_id,
-  });
+        if (userSession && userSession.session) {
+          setSession(userSession.session);
+          form.setValue("user_id", userSession.session.user.id);
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setGenericError("Erro. Verifique o log.");
+          console.error(error.message);
+        }
+        return;
+      }
+    };
+
+    getSession();
+  }, []);
+
+  //Carregando as categorias criadas pelo usuário para exibir no select para deletar
+  const { data: createdData } = trpc.category.getOwnCreatedCategories.useQuery(
+    {
+      user_id: session!.user.id,
+    },
+    {
+      enabled: !!session,
+    }
+  );
 
   const { mutate, isPending: pendingDelete } =
     trpc.category.deleteCategory.useMutation({
-      onSuccess: (data) => {
+      onSuccess: () => {
         toast.success(`Categoria deletada.`);
         utils.category.getOwnCreatedCategories.invalidate();
         utils.category.getCreatedCategories.invalidate();
@@ -77,19 +98,20 @@ export default function DeleteCategory() {
 
   const onSubmit = async (deleteCategoryData: DeleteCategoryType) => {
     try {
-      const userData = await activeSession();
-      if (!userData) {
+      if (!session) {
         forceLogout();
       } else {
-        form.setValue("user_id", userData.session.user.id);
-
         mutate({
           user_id: deleteCategoryData.user_id,
           category_id: deleteCategoryData.category_id,
         });
       }
-
-    } catch (error: unknown) {}
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setGenericError("Erro. Verifique o log.");
+        console.error(error.message);
+      }
+    }
   };
 
   return (
@@ -104,7 +126,9 @@ export default function DeleteCategory() {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                console.log("Formulário inválido", errors);
+              })}
               className="w-2/3 space-y-6"
             >
               <FormField
@@ -118,19 +142,23 @@ export default function DeleteCategory() {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        {!data ? (
-                          <SelectTrigger disabled>
-                            <SelectValue placeholder="Sem categoria criada." />
-                          </SelectTrigger>
-                        ) : (
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione a categoria" />
-                          </SelectTrigger>
-                        )}
+                        <SelectTrigger
+                          disabled={
+                            !createdData || createdData.data.length === 0
+                          }
+                        >
+                          <SelectValue
+                            placeholder={
+                              !createdData || createdData.data.length === 0
+                                ? "Sem categoria criada."
+                                : "Selecione a categoria"
+                            }
+                          />
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {data &&
-                          data.data.map((eachCategory) => (
+                        {createdData &&
+                          createdData.data.map((eachCategory) => (
                             <SelectItem
                               key={eachCategory.id}
                               value={eachCategory.id}
