@@ -6,6 +6,8 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
+import CreateTags from "./components/createTags";
+import CreatedTags from "./createdTags";
 
 export default function TagsPage() {
   return (
@@ -23,7 +25,10 @@ export default function TagsPage() {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-      <section>página de tags</section>
+      <section>
+        {/* <CreatedTags /> */}
+        <CreateTags />
+      </section>
     </main>
   );
 }

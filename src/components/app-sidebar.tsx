@@ -74,6 +74,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Bookmark,
       },
       {
+        title: "Tags",
+        url: "/dashboard/tag",
+        icon: Tag,
+      },
+      {
         title: "Perfil",
         url: "/profile",
         icon: UserPen,

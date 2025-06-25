@@ -5,6 +5,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { TRPCProvider } from "@/components/TrpcProvider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/context/authContext";
 
 const urbanist = Urbanist({
   variable: "--font-urbanist",
@@ -30,15 +31,17 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={urbanist.className}>
         <TRPCProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster />
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </AuthProvider>
         </TRPCProvider>
       </body>
     </html>

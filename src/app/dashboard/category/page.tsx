@@ -32,7 +32,7 @@ export default async function Page() {
         <div className="flex flex-col xl:flex-row gap-5">
           <CreateCategories />
 
-          <DeleteCategory />
+          {/* <DeleteCategory /> */}
         </div>
       </section>
     </>

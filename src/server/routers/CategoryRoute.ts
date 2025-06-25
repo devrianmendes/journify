@@ -11,16 +11,19 @@ import { db } from "@/db/index";
 import { arrayOverlaps, eq, ilike } from "drizzle-orm";
 import { isAuthed } from "../proceduresMiddleware";
 
-const protectedProcedure = publicProcedure.use(isAuthed)
+const protectedProcedure = publicProcedure.use(isAuthed);
 
 export const CategoryRouter = router({
   getCreatedCategories: protectedProcedure
     // .input(CreateCategorySchema)
     .query(async ({ ctx }) => {
       try {
-        const { data, error } = await ctx.supabase.from("categories").select();
+        const data = await db
+          .select()
+          .from(categories)
+          .where(eq(categories.is_public, true));
 
-        if (error || !data) {
+        if (data.length === 0) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Erro ao buscar categorias.",

@@ -39,14 +39,12 @@ import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export default function DeleteCategory() {
+export default function DeleteTags() {
   const [genericError, setGenericError] = useState<string | null>(null); //Erro vindo do banco
   // const [session, setSession] = useState<Session | null>(null);
-  const { isAuth } = useAuth();
+  const {isAuth} = useAuth();
 
-  useEffect(() => {
-    if (isAuth) form.setValue("user_id", isAuth.id);
-  }, []);
+
 
   const form = useForm({
     resolver: zodResolver(DeleteCategorySchema),
@@ -56,6 +54,28 @@ export default function DeleteCategory() {
     },
   });
   const utils = trpc.useUtils();
+
+  //Verificando se o usuário possui sessão ativa. Se tiver, salva o id
+  // useEffect(() => {
+  //   const getSession = async () => {
+  //     try {
+  //       const userSession = await activeSession();
+
+  //       if (userSession && userSession.session) {
+  //         setSession(userSession.session);
+  //         form.setValue("user_id", userSession.session.user.id);
+  //       }
+  //     } catch (error: unknown) {
+  //       if (error instanceof Error) {
+  //         setGenericError("Erro. Verifique o log.");
+  //         console.error(error.message);
+  //       }
+  //       return;
+  //     }
+  //   };
+
+  //   getSession();
+  // }, []);
 
   //Carregando as categorias criadas pelo usuário para exibir no select para deletar
   const { data: createdData } = trpc.category.getOwnCreatedCategories.useQuery(
@@ -80,7 +100,6 @@ export default function DeleteCategory() {
     });
 
   const onSubmit = async (deleteCategoryData: DeleteCategoryType) => {
-    console.log("a");
     try {
       if (!isAuth) {
         forceLogout();

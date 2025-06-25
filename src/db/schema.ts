@@ -53,7 +53,7 @@ export const categories = pgTable("categories", {
   creator_id: uuid("creator_id")
     .references(() => users.id)
     .notNull(),
-  is_public: boolean("is_public").default(true).notNull(),
+  is_public: boolean("is_public").default(false).notNull(),
   created_at: timestamp("created_at").defaultNow().notNull(),
 });
 

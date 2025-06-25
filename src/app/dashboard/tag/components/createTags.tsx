@@ -7,7 +7,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -22,79 +21,64 @@ import {
 import { GradientPicker } from "@/components/gradient-picker";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  CategorySchema,
-  CategoryType,
-  StoredCategoryType,
-} from "@/validators/categoryValidator";
-import { z } from "zod";
 import { useEffect, useState } from "react";
-import {
-  Calculator,
-  Calendar,
-  CreditCard,
-  LoaderPinwheel,
-  Settings,
-  Smile,
-  User,
-} from "lucide-react";
+import { LoaderPinwheel } from "lucide-react";
 import { trpc } from "@/lib/trpc/trpcClient";
-import { SelectContent, SelectItem } from "@radix-ui/react-select";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandSeparator,
-} from "cmdk";
-import { CommandShortcut } from "@/components/ui/command";
+import { NewTagType, TagSchema, TagType } from "@/validators/tagValidator";
 import { useAuth } from "@/context/authContext";
+import { useRouter } from "next/navigation";
 
-export default function CreateCategories() {
-  const [genericError, setGenericError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const utils = trpc.useUtils();
+export default function CreateTags() {
+  const [genericError, setGenericError] = useState<String | null>(null);
+  const [success, setSuccess] = useState<String | null>(null);
   const { isAuth } = useAuth();
+  const router = useRouter();
+  const utils = trpc.useUtils();
+
+  // useEffect(() => {
+  //   if (!isAuth) return;
+  //   console.log(isAuth);
+  //   form.setValue("creator_id", isAuth.id);
+  // }, [isAuth]);
+
+  const { mutate, isPending } = trpc.tag.createTag.useMutation({
+    onSuccess: () => {
+      setSuccess("Tag criada.");
+      // utils.tag.getCreatedTags.invalidate();
+    },
+    onError: (error) => {
+      setGenericError("Erro ao criar tag. Verifique o log.");
+      console.error(error);
+    },
+  });
 
   const form = useForm({
-    resolver: zodResolver(CategorySchema),
+    resolver: zodResolver(TagSchema),
     defaultValues: {
       name: "",
       color: "",
     },
   });
 
-  const { mutate, isPending } = trpc.category.createCategory.useMutation({
-    onSuccess: (data) => {
-      setSuccess("Sugestão enviada para a administração.");
-    },
-    onError: (error) => {
-      setGenericError(error.message);
-    },
-  });
-
-  const exampleBadge = form.watch("name"); //Reatividade na badge de exemplo
-
-  const onSubmit = async (categoryData: CategoryType) => {
+  const onSubmit = (tagData: TagType) => {
     try {
       setGenericError(null);
       setSuccess(null);
 
-      if (!isAuth) return;
+      if (!isAuth) {
+        router.push("/auth/login");
+        return;
+      }
+
       mutate({
-        name: categoryData.name,
-        slug: categoryData.name.toLowerCase().split(" ").join("-"),
-        color: categoryData.color,
+        name: tagData.name,
+        slug: tagData.name.toLowerCase().split(" ").join("-"),
+        color: tagData.color,
         creator_id: isAuth.id,
-        is_public: false,
       });
     } catch (error: unknown) {
-      console.log("Erro ao criar a conta: ", error);
-      setGenericError("Um erro ocorreu. Tente novamente.");
-    } finally {
-      form.reset();
+      setGenericError("Erro ao registrar tag. Verifique o log.");
+      console.error(error);
     }
   };
 
@@ -102,16 +86,15 @@ export default function CreateCategories() {
     <section className="w-full">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Novas categorias</CardTitle>
-          <CardDescription>
-            Caso precise de uma categoria que ainda não está disponível, basta
-            sugerir abaixo que ela será analisada e inserida em poucos minutos:
-          </CardDescription>
+          <CardTitle>Criar tags</CardTitle>
+          <CardDescription>Crie uma tag específica.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                console.log("Formulário inválido", errors);
+              })}
               className="w-2/3 space-y-6"
             >
               <FormField
@@ -121,13 +104,12 @@ export default function CreateCategories() {
                   <FormItem>
                     <FormLabel>Nome</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} placeholder="Criar tag..." />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div></div>
               <FormField
                 control={form.control}
                 name="color"
@@ -142,7 +124,7 @@ export default function CreateCategories() {
                           className="min-w-8"
                           {...field}
                         />
-                        <div className="flex gap-3">
+                        {/* <div className="flex gap-3">
                           Ex:{" "}
                           {field.value?.includes("linear-gradient") ? (
                             <Badge
@@ -157,7 +139,7 @@ export default function CreateCategories() {
                               {exampleBadge ? exampleBadge : "typescript"}
                             </Badge>
                           )}
-                        </div>
+                        </div> */}
                       </div>
                     </FormControl>
                     {/* <FormDescription></FormDescription> */}
@@ -169,13 +151,13 @@ export default function CreateCategories() {
                 <span className="text-red-600 block my-2">{genericError}</span>
               )}
               {success && (
-                <span className="text-green-700 block my-2">{success}</span>
+                <span className="text-green-600 block my-2">{success}</span>
               )}
               <Button disabled={isPending} className="min-w-[130px]">
                 {isPending ? (
                   <LoaderPinwheel className="animate-spin" />
                 ) : (
-                  "Enviar sugestão"
+                  "Criar tag"
                 )}
               </Button>
             </form>
