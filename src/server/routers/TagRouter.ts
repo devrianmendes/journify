@@ -1,8 +1,9 @@
-import { NewTagSchema } from "@/validators/tagValidator";
+import { DeleteTagSchema, NewTagSchema, OwnTagSchema } from "@/validators/tagValidator";
 import { publicProcedure, router } from "../trpc";
 import { db } from "@/lib/drizzle/drizzle.config";
 import { tags } from "@/db/schema";
 import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 
 export const TagRouter = router({
   createTag: publicProcedure
@@ -43,26 +44,40 @@ export const TagRouter = router({
         });
       }
     }),
-  createdTags: publicProcedure.query(async ({ input, ctx }) => {
-    try {
-      const response = await db.select().from(tags);
+  createdTags: publicProcedure
+    .input(OwnTagSchema)
+    .query(async ({ input, ctx }) => {
+      try {
+        const response = await db
+          .select()
+          .from(tags)
+          .where(eq(tags.creator_id, input.creator_id));
 
-      if (response.length === 0) {
+        if (response.length === 0) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Sem tags criadas",
+          });
+        }
+
+        return {
+          status: true,
+          data: response,
+        };
+      } catch (error: unknown) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Sem tags criadas",
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Erro ao buscar categorias.",
         });
       }
-
-      return {
-        status: true,
-        data: response,
-      };
-    } catch (error: unknown) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Erro ao buscar categorias.",
-      });
-    }
+    }),
+  deleteTags: publicProcedure.mutation(async ({ input, ctx }) => {
+    console.log(input)
+    // try {
+    //   const response = db.delete(tags).where(eq(tags.id, input?.id));
+    //   console.log(response);
+    // } catch (error: any) {
+    //   console.log(error);
+    // }
   }),
 });

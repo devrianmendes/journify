@@ -11,14 +11,15 @@ import { trpc } from "@/lib/trpc/trpcClient";
 import { Badge } from "@/components/ui/badge";
 import { useEffect } from "react";
 import { LoaderPinwheel } from "lucide-react";
+import { useAuth } from "@/context/authContext";
 
 export default function CreatedTags() {
-  const { data, isLoading } = trpc.tag.createdTags.useQuery();
+  const { isAuth } = useAuth();
 
-  useEffect(() => {
-    console.log(isLoading);
-  }, [isLoading]);
-  // console.log(data, "data no createDTAG");
+  const { data, isLoading } = trpc.tag.createdTags.useQuery(
+    { creator_id: isAuth?.id || "" },
+    { enabled: !!isAuth } 
+  );
 
   return (
     <section>

@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import CreateTags from "./components/createTags";
 import CreatedTags from "./createdTags";
+import DeleteTags from "./components/deleteTags";
 
 export default function TagsPage() {
   return (
@@ -27,7 +28,10 @@ export default function TagsPage() {
       </header>
       <section>
         <CreatedTags />
-        <CreateTags />
+        <div className="flex">
+          <CreateTags />
+          <DeleteTags />
+        </div>
       </section>
     </main>
   );
