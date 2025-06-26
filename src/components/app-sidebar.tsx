@@ -27,15 +27,15 @@ import { createClient } from "@/lib/supabase/client";
 // This is sample data.
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { username, email, avatar_url } = JSON.parse(
-    localStorage.getItem("userData")!
-  );
+  // const { username, email, avatar_url } = JSON.parse(
+  //   localStorage.getItem("userData")!
+  // );
 
   const dataMenu = {
     user: {
-      name: username,
-      email: email,
-      avatar: avatar_url,
+      name: "mudar",
+      email: "mudar",
+      avatar: "mudar",
     },
     
     navMain: [

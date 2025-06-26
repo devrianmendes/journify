@@ -26,7 +26,7 @@ export default function TagsPage() {
         </Breadcrumb>
       </header>
       <section>
-        {/* <CreatedTags /> */}
+        <CreatedTags />
         <CreateTags />
       </section>
     </main>
