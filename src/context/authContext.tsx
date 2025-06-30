@@ -34,14 +34,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuth(data.user);
       } catch (error: unknown) {
         if (error instanceof AuthError) {
-          console.error(error);
+
         }
-        console.log(error);
+
       }
     };
     getUser();
 
-    console.log(isAuth)
+  
 
     // supabase.auth.onAuthStateChange((_event, session) => {
     //   setIsSession(user);

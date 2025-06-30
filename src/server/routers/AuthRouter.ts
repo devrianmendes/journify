@@ -76,7 +76,7 @@ export const AuthRouter = router({
         if (error instanceof TRPCError) {
           throw error;
         }
-        // console.log(error)
+
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Erro interno do servidor. Tente novamente mais tarde.",

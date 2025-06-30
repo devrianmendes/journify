@@ -112,14 +112,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // const { data, error } = await supabase.auth.getSession();
 
   // const userData = useSessionData();
-  // console.log(userData);
+
   const supabase = createClient();
 
   // const [user, setUser] = React.useState(supabase.auth.getUser());
   React.useEffect(() => {
     const fun = async () => {
       const user = await supabase.auth.getUser();
-      console.log(user, "getUser do context");
+
     };
     fun();
   }, []);

@@ -1,12 +1,19 @@
-import { DeleteTagSchema, NewTagSchema, OwnTagSchema } from "@/validators/tagValidator";
+import {
+  DeleteTagSchema,
+  NewTagSchema,
+  OwnTagSchema,
+} from "@/validators/tagValidator";
 import { publicProcedure, router } from "../trpc";
 import { db } from "@/lib/drizzle/drizzle.config";
 import { tags } from "@/db/schema";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { isAuthed } from "../proceduresMiddleware";
+
+const protectedProcedure = publicProcedure.use(isAuthed);
 
 export const TagRouter = router({
-  createTag: publicProcedure
+  createTag: protectedProcedure
     .input(NewTagSchema)
     .mutation(async ({ input, ctx }) => {
       try {
@@ -44,7 +51,7 @@ export const TagRouter = router({
         });
       }
     }),
-  createdTags: publicProcedure
+  createdTags: protectedProcedure
     .input(OwnTagSchema)
     .query(async ({ input, ctx }) => {
       try {
@@ -59,7 +66,6 @@ export const TagRouter = router({
             message: "Sem tags criadas",
           });
         }
-
         return {
           status: true,
           data: response,
@@ -71,13 +77,19 @@ export const TagRouter = router({
         });
       }
     }),
-  deleteTags: publicProcedure.mutation(async ({ input, ctx }) => {
-    console.log(input)
-    // try {
-    //   const response = db.delete(tags).where(eq(tags.id, input?.id));
-    //   console.log(response);
-    // } catch (error: any) {
-    //   console.log(error);
-    // }
-  }),
+  deleteTags: protectedProcedure
+    .input(DeleteTagSchema)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const creator_id = ctx.user.id;
+        const response = await db.delete(tags).where(
+          and(
+            eq(tags.id, input.id), 
+            eq(tags.creator_id, creator_id)
+          )
+        );
+      } catch (error: any) {
+
+      }
+    }),
 });

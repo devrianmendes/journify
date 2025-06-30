@@ -35,7 +35,7 @@ export default function CreatedTags() {
             <div className="flex flex-wrap gap-3">
               {data && data.status === true
                 ? data.data.map((eachTag) => (
-                    <Badge color={eachTag.color}>{eachTag.name}</Badge>
+                    <Badge color={eachTag.color} key={eachTag.id}>{eachTag.name}</Badge>
                   ))
                 : ""}
             </div>

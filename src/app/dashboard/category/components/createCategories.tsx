@@ -91,7 +91,7 @@ export default function CreateCategories() {
         is_public: false,
       });
     } catch (error: unknown) {
-      console.log("Erro ao criar a conta: ", error);
+
       setGenericError("Um erro ocorreu. Tente novamente.");
     } finally {
       form.reset();

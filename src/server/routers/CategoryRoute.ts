@@ -8,7 +8,7 @@ import { publicProcedure, router } from "../trpc";
 import { categories } from "@/db/schema";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db/index";
-import { arrayOverlaps, eq, ilike } from "drizzle-orm";
+import { and, arrayOverlaps, eq, ilike } from "drizzle-orm";
 import { isAuthed } from "../proceduresMiddleware";
 
 const protectedProcedure = publicProcedure.use(isAuthed);
@@ -64,7 +64,6 @@ export const CategoryRouter = router({
 
         return { data: createdCategory, error: null };
       } catch (error: any) {
-        // console.log(error);
         if (error?.cause?.code === "23505" || error?.code === "23505") {
           throw new TRPCError({
             code: "CONFLICT",
@@ -121,38 +120,30 @@ export const CategoryRouter = router({
           error: error,
         };
       }
-      // console.log(input.name, 'oaisjdoaijsdijadoijdoiajsdiojasoijdoiasjdiojaoidjoaisjdoiajsiodjaoisdj');
     }),
   deleteCategory: protectedProcedure
     .input(DeleteCategorySchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       try {
-        const selectecCategory = await db.query.categories.findFirst({
-          where: eq(categories.id, input.category_id),
-        });
-
-        if (!selectecCategory) {
-          console.log(selectecCategory, "selectecCategory falso");
-          throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "Erro ao deletar categoria.",
-          });
-        }
-
-        if (selectecCategory.creator_id !== input.user_id) {
-          console.log(selectecCategory, "diferente do usuario");
-          throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "Erro ao deletar categoria.",
-          });
-        }
-
-        const deleteSelectedCategory = await db
+        const deletedCategory = await db
           .delete(categories)
-          .where(eq(categories.id, input.category_id));
+          .where(
+            and(
+              eq(categories.id, input.category_id),
+              eq(categories.creator_id, ctx.user.id)
+            )
+          )
+          .returning({ id: categories.id });
+
+        if (deletedCategory.length === 0) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Categoria não encontrada ou já foi deletada.",
+          });
+        }
 
         return {
-          data: deleteSelectedCategory,
+          data: deletedCategory,
           error: null,
         };
       } catch (error: unknown) {

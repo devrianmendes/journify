@@ -54,7 +54,7 @@ export function LoginForm({
     },
     onError: (error) => {
       setGenericError(error.message);
-      console.log(error);
+
     },
   });
 

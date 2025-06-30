@@ -35,16 +35,11 @@ export default function CreateTags() {
   const router = useRouter();
   const utils = trpc.useUtils();
 
-  // useEffect(() => {
-  //   if (!isAuth) return;
-  //   console.log(isAuth);
-  //   form.setValue("creator_id", isAuth.id);
-  // }, [isAuth]);
 
   const { mutate, isPending } = trpc.tag.createTag.useMutation({
     onSuccess: () => {
       setSuccess("Tag criada.");
-      // utils.tag.getCreatedTags.invalidate();
+      utils.tag.createdTags.invalidate();
     },
     onError: (error) => {
       setGenericError("Erro ao criar tag. Verifique o log.");
@@ -93,7 +88,7 @@ export default function CreateTags() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                console.log("Formulário inválido", errors);
+            
               })}
               className="w-2/3 space-y-6"
             >

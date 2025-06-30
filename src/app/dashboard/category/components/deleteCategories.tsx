@@ -41,23 +41,9 @@ import { toast } from "sonner";
 
 export default function DeleteCategory() {
   const [genericError, setGenericError] = useState<string | null>(null); //Erro vindo do banco
-  // const [session, setSession] = useState<Session | null>(null);
   const { isAuth } = useAuth();
-
-  useEffect(() => {
-    if (isAuth) form.setValue("user_id", isAuth.id);
-  }, []);
-
-  const form = useForm({
-    resolver: zodResolver(DeleteCategorySchema),
-    defaultValues: {
-      user_id: "",
-      category_id: "",
-    },
-  });
   const utils = trpc.useUtils();
 
-  //Carregando as categorias criadas pelo usuário para exibir no select para deletar
   const { data: createdData } = trpc.category.getOwnCreatedCategories.useQuery(
     {
       user_id: isAuth?.id ?? "",
@@ -67,6 +53,13 @@ export default function DeleteCategory() {
     }
   );
 
+  const form = useForm({
+    resolver: zodResolver(DeleteCategorySchema),
+    defaultValues: {
+      category_id: "",
+    },
+  });
+
   const { mutate, isPending: pendingDelete } =
     trpc.category.deleteCategory.useMutation({
       onSuccess: () => {
@@ -75,18 +68,18 @@ export default function DeleteCategory() {
         utils.category.getCreatedCategories.invalidate();
       },
       onError: (error) => {
-        console.log(error, "erro no useMutation");
+        toast.error("Erro ao criar categoria. Verifique o log.");
+        setGenericError("Erro ao criar categoria. Verifique o log.");
+        console.error(error.message);
       },
     });
 
   const onSubmit = async (deleteCategoryData: DeleteCategoryType) => {
-    console.log("a");
     try {
-      if (!isAuth) {
+      if (!isAuth || !isAuth.id) {
         forceLogout();
       } else {
         mutate({
-          user_id: deleteCategoryData.user_id,
           category_id: deleteCategoryData.category_id,
         });
       }
@@ -110,9 +103,7 @@ export default function DeleteCategory() {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                console.log("Formulário inválido", errors);
-              })}
+              onSubmit={form.handleSubmit(onSubmit, (errors) => {})}
               className="w-2/3 space-y-6"
             >
               <FormField

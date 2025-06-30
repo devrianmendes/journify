@@ -43,32 +43,51 @@ import { toast } from "sonner";
 export default function DeleteTags() {
   const [genericError, setGenericError] = useState<String | null>(null);
   const { isAuth } = useAuth();
+  const utils = trpc.useUtils();
 
-  if (!isAuth) return;
-
-  const {data} = trpc.tag.createdTags.useQuery({ creator_id: isAuth.id });
-
-  const { mutate, isPending } = trpc.tag.deleteTags.useMutation({
-    onSuccess: () => {
-      console.log("deu bom");
+  const { data: createdData, isLoading } = trpc.tag.createdTags.useQuery(
+    {
+      creator_id: isAuth?.id || "",
     },
-    onError: () => {
-      console.log("deu ruim");
-    },
-  });
+    {
+      enabled: !!isAuth,
+    }
+  );
 
   const form = useForm({
     resolver: zodResolver(DeleteTagSchema),
     defaultValues: {
       id: "",
-      creator_id: "",
+    },
+  });
+
+  const { mutate, isPending } = trpc.tag.deleteTags.useMutation({
+    onSuccess: () => {
+      utils.tag.createdTags.invalidate();
+      toast.success(`Tag deletada.`);
+    },
+    onError: (error) => {
+      toast.error("Erro ao criar tag. Verifique o log.");
+      setGenericError("Erro ao criar tag. Verifique o log.");
+      console.error(error.message);
     },
   });
 
   const onSubmit = async (deleteTagData: DeleteTagType) => {
-    console.log(deleteTagData);
-
-    mutate;
+    try {
+      if (!isAuth || !isAuth.id) {
+        forceLogout();
+      } else {
+        mutate(deleteTagData);
+      }
+    } catch (error: any) {
+      if (error instanceof Error) {
+        setGenericError("Erro. Verifique o log.");
+        console.error(error.message);
+      }
+      setGenericError("Erro. Verifique o log.");
+      console.error(error.message);
+    }
   };
 
   return (
@@ -81,9 +100,7 @@ export default function DeleteTags() {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                console.log("Formulário inválido", errors);
-              })}
+              onSubmit={form.handleSubmit(onSubmit, (errors) => {})}
               className="w-2/3 space-y-6"
             >
               <FormField
@@ -91,13 +108,13 @@ export default function DeleteTags() {
                 name="id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Suas categorias</FormLabel>
+                    <FormLabel>Suas Tags</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        {/* <SelectTrigger
+                        <SelectTrigger
                           disabled={
                             !createdData || createdData.data.length === 0
                           }
@@ -105,13 +122,13 @@ export default function DeleteTags() {
                           <SelectValue
                             placeholder={
                               !createdData || createdData.data.length === 0
-                                ? "Sem categoria criada."
-                                : "Selecione a categoria"
+                                ? "Sem tag criada."
+                                : "Selecione a tag"
                             }
                           />
-                        </SelectTrigger> */}
+                        </SelectTrigger>
                       </FormControl>
-                      {/* <SelectContent>
+                      <SelectContent>
                         {createdData &&
                           createdData.data.map((eachCategory) => (
                             <SelectItem
@@ -121,12 +138,11 @@ export default function DeleteTags() {
                               {eachCategory.name}
                             </SelectItem>
                           ))}
-                      </SelectContent> */}
+                      </SelectContent>
                     </Select>
                     <FormDescription>
                       <span className="block">
-                        Apenas categorias criadas por você poderão ser
-                        deletadas.
+                        Apenas tags criadas por você poderão ser deletadas.
                       </span>
                     </FormDescription>
                     <FormMessage />
@@ -141,7 +157,7 @@ export default function DeleteTags() {
                 {isPending ? (
                   <LoaderPinwheel className="animate-spin" />
                 ) : (
-                  "Deletar categoria"
+                  "Deletar tag"
                 )}
               </Button>
             </form>

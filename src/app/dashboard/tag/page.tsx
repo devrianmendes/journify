@@ -26,9 +26,9 @@ export default function TagsPage() {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-      <section>
+      <section className="flex flex-col gap-3">
         <CreatedTags />
-        <div className="flex">
+        <div className="flex gap-3">
           <CreateTags />
           <DeleteTags />
         </div>

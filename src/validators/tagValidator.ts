@@ -18,7 +18,7 @@ export const OwnTagSchema = z.object({
 
 export const DeleteTagSchema = z.object({
   id: z.string().min(1, 'Selecione uma tag.'),
-  creator_id: z.string().min(1, 'Erro ao encontrar usuário.'),
+  // creator_id: z.string().min(1, 'Erro ao encontrar usuário.'),
 });
 
 
