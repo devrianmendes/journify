@@ -12,6 +12,7 @@ import { isAuthed } from "../proceduresMiddleware";
 import createTagService from "@/server/services/create-tag-service";
 import { AlreadyExist } from "@/errors/already-exist-error";
 import forceLogout from "@/hooks/use-logout";
+import { handleServiceError } from "@/errors/handle-controller-errors";
 
 const protectedProcedure = publicProcedure.use(isAuthed);
 
@@ -27,21 +28,7 @@ export const TagRouter = router({
         const createTag = await createTagService(input);
         return createTag;
       } catch (error: any) {
-        if (error instanceof AlreadyExist) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: error.message,
-          });
-        }
-
-        if (error instanceof TRPCError) {
-          throw error;
-        }
-
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Erro ao registrar tag.",
-        });
+        handleServiceError(error);
       }
     }),
   createdTags: protectedProcedure
