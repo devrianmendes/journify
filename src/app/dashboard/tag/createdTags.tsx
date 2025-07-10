@@ -33,7 +33,7 @@ export default function CreatedTags() {
             <LoaderPinwheel className="animate-spin min-w-20" />
           ) : (
             <div className="flex flex-wrap gap-3">
-              {data && data.status === true
+              {data && data.success === true
                 ? data.data.map((eachTag) => (
                     <Badge color={eachTag.color} key={eachTag.id}>
                       {eachTag.name}
