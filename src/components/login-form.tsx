@@ -27,7 +27,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { toast } from "sonner";
-import { trpc } from "@/lib/trpc/trpcClient";
+import { trpc } from "@/lib/trpc/trpc-client";
 
 type SignInProps = z.infer<typeof SignInSchema>;
 
@@ -54,7 +54,6 @@ export function LoginForm({
     },
     onError: (error) => {
       setGenericError(error.message);
-
     },
   });
 

@@ -1,12 +1,12 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
-import { trpc } from "@/lib/trpc/trpcClient";
+import { trpc } from "@/lib/trpc/trpc-client";
 
 export default function Wrapper() {
   // const [category, setCategory] = useState<CategoryType>([]);
 
   const { data } = trpc.category.getCreatedCategories.useQuery();
-  
+
   return (
     <div className={`flex flex-wrap gap-3`}>
       {data ? (

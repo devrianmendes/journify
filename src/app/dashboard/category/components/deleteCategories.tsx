@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { AuthContext, useAuth } from "@/context/authContext";
 import forceLogout from "@/hooks/use-logout";
-import { trpc } from "@/lib/trpc/trpcClient";
+import { trpc } from "@/lib/trpc/trpc-client";
 import {
   DeleteCategorySchema,
   DeleteCategoryType,

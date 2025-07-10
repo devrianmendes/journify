@@ -23,7 +23,7 @@ import { GradientPicker } from "@/components/gradient-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { LoaderPinwheel } from "lucide-react";
-import { trpc } from "@/lib/trpc/trpcClient";
+import { trpc } from "@/lib/trpc/trpc-client";
 import { NewTagType, TagSchema, TagType } from "@/validators/tagValidator";
 import { useAuth } from "@/context/authContext";
 import { useRouter } from "next/navigation";
@@ -34,7 +34,6 @@ export default function CreateTags() {
   const { isAuth } = useAuth();
   const router = useRouter();
   const utils = trpc.useUtils();
-
 
   const { mutate, isPending } = trpc.tag.createTag.useMutation({
     onSuccess: () => {
@@ -87,9 +86,7 @@ export default function CreateTags() {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit, (errors) => {
-            
-              })}
+              onSubmit={form.handleSubmit(onSubmit, (errors) => {})}
               className="w-2/3 space-y-6"
             >
               <FormField

@@ -38,7 +38,7 @@ import {
   Smile,
   User,
 } from "lucide-react";
-import { trpc } from "@/lib/trpc/trpcClient";
+import { trpc } from "@/lib/trpc/trpc-client";
 import { SelectContent, SelectItem } from "@radix-ui/react-select";
 import {
   Command,
@@ -73,7 +73,6 @@ export default function CreateCategories() {
     onError: (error) => {
       setGenericError(error.message);
     },
-    
   });
 
   const exampleBadge = form.watch("name"); //Reatividade na badge de exemplo
@@ -92,7 +91,6 @@ export default function CreateCategories() {
         is_public: false,
       });
     } catch (error: unknown) {
-
       setGenericError("Um erro ocorreu. Tente novamente.");
     } finally {
       form.reset();

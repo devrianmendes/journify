@@ -26,7 +26,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { SignUpSchema } from "@/validators/signupValidator";
-import { trpc } from "@/lib/trpc/trpcClient";
+import { trpc } from "@/lib/trpc/trpc-client";
 
 type SignUpProps = z.infer<typeof SignUpSchema>;
 

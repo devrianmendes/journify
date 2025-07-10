@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { trpc } from "@/lib/trpc/trpcClient";
+import { trpc } from "@/lib/trpc/trpc-client";
 import { Badge } from "@/components/ui/badge";
 import { useEffect } from "react";
 import { LoaderPinwheel } from "lucide-react";
@@ -18,7 +18,7 @@ export default function CreatedTags() {
 
   const { data, isLoading } = trpc.tag.createdTags.useQuery(
     { creator_id: isAuth?.id || "" },
-    { enabled: !!isAuth } 
+    { enabled: !!isAuth }
   );
 
   return (
@@ -35,7 +35,9 @@ export default function CreatedTags() {
             <div className="flex flex-wrap gap-3">
               {data && data.status === true
                 ? data.data.map((eachTag) => (
-                    <Badge color={eachTag.color} key={eachTag.id}>{eachTag.name}</Badge>
+                    <Badge color={eachTag.color} key={eachTag.id}>
+                      {eachTag.name}
+                    </Badge>
                   ))
                 : ""}
             </div>
