@@ -73,6 +73,7 @@ export default function CreateCategories() {
     onError: (error) => {
       setGenericError(error.message);
     },
+    
   });
 
   const exampleBadge = form.watch("name"); //Reatividade na badge de exemplo
